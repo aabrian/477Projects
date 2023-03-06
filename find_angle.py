@@ -67,6 +67,7 @@ if __name__ == '__main__':
 
                 pts = res.corners.reshape((-1, 1, 2)).astype(np.int32)
                 img = cv2.polylines(img, [pts], isClosed=True, color=(0, 0, 255), thickness=5)
+                ##################################################################   edited code
                 cv2.circle(img, tuple(res.center.astype(np.int32)), 5, (0, 0, 255), -1)
                 pose[0][1]= 0
                 Tag_loc = pose[0]
@@ -84,7 +85,7 @@ if __name__ == '__main__':
             
                 theta = (np.arctan2(mag_cross, dot_AB))*180/np.pi
                 print("theta: ", theta)
-                
+                ##############################################################################
 
             cv2.imshow("img", img)
             cv2.waitKey(10)
