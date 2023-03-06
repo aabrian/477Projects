@@ -82,9 +82,12 @@ if __name__ == '__main__':
                 print("dot product", dot_AB)
 
 
-            
-                theta = (np.arctan2(mag_cross, dot_AB))*180/np.pi
-                print("theta: ", theta)
+                if pose[0][0] < 0:
+                    theta = -(np.arctan2(mag_cross, dot_AB))*180/np.pi
+                    print("theta: ", theta)
+                else:
+                    theta = (np.arctan2(mag_cross, dot_AB))*180/np.pi
+                    print("theta: ", theta)
                 ##############################################################################
 
             cv2.imshow("img", img)
