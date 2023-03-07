@@ -17,6 +17,7 @@ at_detector = Detector(
 
 def find_pose_from_tag(K, detection):
     m_half_size = tag_size / 2
+    
 
     marker_center = np.array((0, 0, 0))
     marker_points = []
