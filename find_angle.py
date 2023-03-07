@@ -6,6 +6,7 @@ from robomaster import robot
 from robomaster import camera
 from math import(asin, pi, atan2, cos, atan, acos)
 
+
 at_detector = Detector(
     families="tag36h11",
     nthreads=1,
