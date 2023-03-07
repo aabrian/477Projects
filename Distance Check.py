@@ -51,6 +51,8 @@ def find_robot_pos(tag_coord,tag_orientation,robot_tag_pose):
     if tag_orientation == 'up':
         world_pos[0] = tag_coord[0]+robot_tag_pose[2]
         world_pos[1] = tag_coord[1]-robot_tag_pose[0]        
+
+        
     return world_pos
 
 
