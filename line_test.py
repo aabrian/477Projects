@@ -4,6 +4,7 @@ import numpy as np
 import time
 from robomaster import robot
 from robomaster import camera
+from math import(sin, cos, asin, pi, atan2, atan, acos)
 
 at_detector = Detector(
     families="tag36h11",
@@ -17,7 +18,6 @@ at_detector = Detector(
 
 def find_pose_from_tag(K, detection):
     m_half_size = tag_size / 2
-    
 
     marker_center = np.array((0, 0, 0))
     marker_points = []
@@ -39,58 +39,82 @@ def find_pose_from_tag(K, detection):
 
     return p.reshape((3,)), r.reshape((3,))
 
+def rotation_wa(theta):
+    rot = np.array([[sin(theta),cos(theta),0], [0,0,-1], [-cos(theta),sin(theta),0]])
+    return np.linalg.inv(rot)
 
 if __name__ == '__main__':
     ep_robot = robot.Robot()
     ep_robot.initialize(conn_type="ap")
     ep_camera = ep_robot.camera
     ep_camera.start_video_stream(display=False, resolution=camera.STREAM_360P)
-    ep_chassis = ep_robot.chassis
 
     tag_size=0.2 # tag size in meters
-    l = .265
-    tag_coords = {34 : [-8.5*l,0],34:[-8*l,-15*l],33:[-7.5*l,0],31:[-7.5*l,2*l],35:[-6*l,2.5*l],
-36:[-4*l,2.5],42:[-2.5*l,2*l],44:[-2.5*l,2*l],46:[-2*l,-1.5*l],45:[-1.5*l,0]}
+
+    ep_chassis = ep_robot.chassis
+
     while True:
         try:
-            img = ep_camera.read_cv2_image(strategy="newest", timeout=2)   
+            img = ep_camera.read_cv2_image(strategy="newest", timeout=1)   
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             gray.astype(np.uint8)
 
-            K=np.array([[184.752, 0, 320], [0, 184.752, 180], [0, 0, 1]])
+            kk = 1
+            K=np.array([[184.752*kk, 0, 320], [0, 184.752*kk, 180], [0, 0, 1]])
 
             results = at_detector.detect(gray, estimate_tag_pose=False)
-           
 
             for res in results:
-                # print(res.tag_id)
-
                 pose = find_pose_from_tag(K, res)
-                rot, jaco = cv2.Rodrigues(pose[1], pose[1])
-                print(rot)
+                rot_ca, jaco = cv2.Rodrigues(pose[1], pose[1])
+                # print('rotation = ')
+                # print(rot_ca) # Rca - rotation matrix of 
 
                 pts = res.corners.reshape((-1, 1, 2)).astype(np.int32)
                 img = cv2.polylines(img, [pts], isClosed=True, color=(0, 0, 255), thickness=5)
                 cv2.circle(img, tuple(res.center.astype(np.int32)), 5, (0, 0, 255), -1)
+                # print('x_pos = ')
+                x_pos = pose[0][2]
+                y_pos = pose[0][0]
+                rot_wa = rotation_wa(np.pi)
+                rot_ac = np.transpose(rot_ca)
+                rot_wc = np.matmul(rot_wa, rot_ac)
+                rot_bc = np.array([[0, 0, 1], [1, 0, 0], [0, -1, 0]])
+                w2b = np.matmul(rot_bc,np.transpose(rot_wc))
+                # R_bw = rot_cb.T @ 
+                v_w = np.array([1,0,0])
+                kb = 0.25
+                v_b = kb*np.matmul(w2b,v_w)
+                cv2.circle(img, tuple(res.center.astype(np.int32)), 5, (0, 0, 255), -1)
+                pose[0][1]= 0
+                Tag_loc = pose[0]
+                Dtag_loc = [0, 0, 1]
+                # print("Tag location ", Tag_loc)
+                # print("Desired Tag location ", Dtag_loc)
 
-                print(type(pose[0]))
-                pose[0][1] = 0
-                pose_normalized = pose[0]/(pose[0]**2).sum()**0.5
-                pose_desired = np.array([0,0,1])
-                cross_product = np.cross(pose_normalized,pose_desired);
-                k = 140
-                w = -k*cross_product
-                print(w)
-                ep_chassis.drive_speed(x=0, y=0, z=w[1], timeout=1)
-                # print(w[1])
-                time.sleep(.1)
+                cross_product_AB = np.cross(Tag_loc, Dtag_loc)
+                mag_cross = np.linalg.norm(cross_product_AB)
+            
+                dot_AB = np.dot(Tag_loc,Dtag_loc)
+                # print("dot product", dot_AB)
 
+
+                if pose[0][0] < 0:
+                    theta = -(np.arctan2(mag_cross, dot_AB))*180/np.pi
+                    # print("theta: ", theta)
+                else:
+                    theta = (np.arctan2(mag_cross, dot_AB))*180/np.pi
+                    # print("theta: ", theta)
+                kt = 1
+                ep_chassis.drive_speed(x = v_b[1], y = v_b[0], z=kt*theta, timeout=.5)
 
             cv2.imshow("img", img)
             cv2.waitKey(10)
-
+           
         except KeyboardInterrupt:
             ep_camera.stop_video_stream()
             ep_robot.close()
             print ('Exiting')
             exit(1)
+
+
