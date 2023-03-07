@@ -100,12 +100,14 @@ if __name__ == '__main__':
 
 
                 if pose[0][0] < 0:
-                    theta = -(np.arctan2(mag_cross, dot_AB))*180/np.pi
-                    # print("theta: ", theta)
-                else:
                     theta = (np.arctan2(mag_cross, dot_AB))*180/np.pi
-                    # print("theta: ", theta)
+                    print("theta: ", theta)
+                else:
+                    theta = -(np.arctan2(mag_cross, dot_AB))*180/np.pi
+                    print("theta: ", theta)
                 kt = 1
+                if theta < 0:
+                    z = 0
                 ep_chassis.drive_speed(x = v_b[1], y = v_b[0], z=kt*theta, timeout=.5)
 
             cv2.imshow("img", img)
