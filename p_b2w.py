@@ -53,6 +53,10 @@ if __name__ == '__main__':
 
     ep_chassis = ep_robot.chassis
 
+    l = .265
+    tag_coords = {34 : [-8.5*l,0],34:[-8*l,-15*l],33:[-7.5*l,0],31:[-7.5*l,2*l],35:[-6*l,2.5*l],
+36:[-4*l,2.5],42:[-2.5*l,2*l],44:[-2.5*l,2*l],46:[-2*l,-1.5*l],45:[-1.5*l,0]}
+
     while True:
         try:
             img = ep_camera.read_cv2_image(strategy="newest", timeout=1)   
@@ -100,14 +104,12 @@ if __name__ == '__main__':
 
 
                 if pose[0][0] < 0:
-                    theta = (np.arctan2(mag_cross, dot_AB))*180/np.pi
-                    print("theta: ", theta)
-                else:
                     theta = -(np.arctan2(mag_cross, dot_AB))*180/np.pi
-                    print("theta: ", theta)
+                    # print("theta: ", theta)
+                else:
+                    theta = (np.arctan2(mag_cross, dot_AB))*180/np.pi
+                    # print("theta: ", theta)
                 kt = 1
-                if theta < 0:
-                    z = 0
                 ep_chassis.drive_speed(x = v_b[1], y = v_b[0], z=kt*theta, timeout=.5)
 
             cv2.imshow("img", img)
