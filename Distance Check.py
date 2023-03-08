@@ -75,7 +75,8 @@ if __name__ == '__main__':
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             gray.astype(np.uint8)
 
-            K=np.array([[184.752, 0, 320], [0, 184.752, 180], [0, 0, 1]])
+            kk = 1.7
+            K=np.array([[184.752*kk, 0, 320], [0, 184.752*kk, 180], [0, 0, 1]])
 
             results = at_detector.detect(gray, estimate_tag_pose=False)
            

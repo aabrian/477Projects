@@ -70,19 +70,24 @@ if __name__ == '__main__':
 
             for res in results:
                 pose = find_pose_from_tag(K, res)
-                print('pose = ')
-                print(pose)
-                id = res.tag_id
+                # print('pose = ')
+                # print(pose[0])
+                id = int(res.tag_id)
                 rot_ca, jaco = cv2.Rodrigues(pose[1], pose[1])
-                print('rot = ')
-                print(rot_ca)
+                # print('rot = ')
+                # print(rot_ca)
                 pts = res.corners.reshape((-1, 1, 2)).astype(np.int32)
                 img = cv2.polylines(img, [pts], isClosed=True, color=(0, 0, 255), thickness=5)
                 cv2.circle(img, tuple(res.center.astype(np.int32)), 5, (0, 0, 255), -1)
-
+                T_ca = np.array([[rot_ca[0][0],rot_ca[0][1],rot_ca[0][2],pose[0][0]],[rot_ca[1][0],rot_ca[1][1],rot_ca[1][2],pose[0][1]],[rot_ca[2][0],rot_ca[2][1],rot_ca[2][2],pose[0][2]],[0,0,0,1]])
+                T_ac = np.linalg.inv(T_ca)
+                # print(T_ca)
+                time.sleep(.5)
                 x_pos = pose[0][2]
                 y_pos = pose[0][0]
+                print()
                 rot_wa = rotation_wa(tag_coords[45][2])
+                print(rot_wa)
                 rot_ac = np.transpose(rot_ca)
                 rot_wc = np.matmul(rot_wa, rot_ac)
                 rot_bc = np.array([[0, 0, 1], [1, 0, 0], [0, -1, 0]])
