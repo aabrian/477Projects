@@ -49,7 +49,7 @@ if __name__ == '__main__':
 
     tag_size=0.2 # tag size in meters
     l = .265
-    tag_coords = {34 : [-8.5*l,0],34:[-8*l,-15*l],33:[-7.5*l,0],31:[-7.5*l,2*l],35:[-6*l,2.5*l],
+    tag_coords = {32:[-8.5*l,0],34:[-8*l,-1.5*l],33:[-7.5*l,0],31:[-7.5*l,2*l],35:[-6*l,2.5*l],
 36:[-4*l,2.5],42:[-2.5*l,2*l],44:[-2.5*l,2*l],46:[-2*l,-1.5*l],45:[-1.5*l,0]}
     while True:
         try:
@@ -63,11 +63,11 @@ if __name__ == '__main__':
            
 
             for res in results:
-                # print(res.tag_id)
+                print(res.tag_id)
 
                 pose = find_pose_from_tag(K, res)
                 rot, jaco = cv2.Rodrigues(pose[1], pose[1])
-                print(rot)
+                # print(rot)
 
                 pts = res.corners.reshape((-1, 1, 2)).astype(np.int32)
                 img = cv2.polylines(img, [pts], isClosed=True, color=(0, 0, 255), thickness=5)
@@ -81,7 +81,7 @@ if __name__ == '__main__':
                 k = 140
                 w = -k*cross_product
                 print(w)
-                ep_chassis.drive_speed(x=0, y=0, z=w[1], timeout=1)
+                # ep_chassis.drive_speed(x=0, y=0, z=w[1], timeout=1)
                 # print(w[1])
                 time.sleep(.1)
 

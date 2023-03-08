@@ -54,8 +54,8 @@ if __name__ == '__main__':
     ep_chassis = ep_robot.chassis
 
     l = .265
-    tag_coords = {34 : [-8.5*l,0],34:[-8*l,-15*l],33:[-7.5*l,0],31:[-7.5*l,2*l],35:[-6*l,2.5*l],
-36:[-4*l,2.5],42:[-2.5*l,2*l],44:[-2.5*l,2*l],46:[-2*l,-1.5*l],45:[-1.5*l,0]}
+    tag_coords = {32:[-8.5*l,0],34:[-8*l,-1.5*l],33:[-7.5*l,0],31:[-7.5*l,2*l],35:[-6*l,2.5*l],
+    36:[-4*l,2.5],42:[-2.5*l,2*l],44:[-2.5*l,2*l],46:[-2*l,-1.5*l],45:[-1.5*l,0,0]}
 
     while True:
         try:
@@ -70,22 +70,23 @@ if __name__ == '__main__':
 
             for res in results:
                 pose = find_pose_from_tag(K, res)
+                print('pose = ')
+                print(pose)
+                id = res.tag_id
                 rot_ca, jaco = cv2.Rodrigues(pose[1], pose[1])
-                # print('rotation = ')
-                # print(rot_ca) # Rca - rotation matrix of 
-
+                print('rot = ')
+                print(rot_ca)
                 pts = res.corners.reshape((-1, 1, 2)).astype(np.int32)
                 img = cv2.polylines(img, [pts], isClosed=True, color=(0, 0, 255), thickness=5)
                 cv2.circle(img, tuple(res.center.astype(np.int32)), 5, (0, 0, 255), -1)
-                # print('x_pos = ')
+
                 x_pos = pose[0][2]
                 y_pos = pose[0][0]
-                rot_wa = rotation_wa(np.pi)
+                rot_wa = rotation_wa(tag_coords[45][2])
                 rot_ac = np.transpose(rot_ca)
                 rot_wc = np.matmul(rot_wa, rot_ac)
                 rot_bc = np.array([[0, 0, 1], [1, 0, 0], [0, -1, 0]])
                 w2b = np.matmul(rot_bc,np.transpose(rot_wc))
-                # R_bw = rot_cb.T @ 
                 v_w = np.array([1,0,0])
                 kb = 0.25
                 v_b = kb*np.matmul(w2b,v_w)
@@ -93,24 +94,19 @@ if __name__ == '__main__':
                 pose[0][1]= 0
                 Tag_loc = pose[0]
                 Dtag_loc = [0, 0, 1]
-                # print("Tag location ", Tag_loc)
-                # print("Desired Tag location ", Dtag_loc)
 
                 cross_product_AB = np.cross(Tag_loc, Dtag_loc)
                 mag_cross = np.linalg.norm(cross_product_AB)
             
                 dot_AB = np.dot(Tag_loc,Dtag_loc)
-                # print("dot product", dot_AB)
 
 
                 if pose[0][0] < 0:
                     theta = -(np.arctan2(mag_cross, dot_AB))*180/np.pi
-                    # print("theta: ", theta)
                 else:
                     theta = (np.arctan2(mag_cross, dot_AB))*180/np.pi
-                    # print("theta: ", theta)
                 kt = 1
-                ep_chassis.drive_speed(x = v_b[1], y = v_b[0], z=kt*theta, timeout=.5)
+                # ep_chassis.drive_speed(x = v_b[1], y = v_b[0], z=kt*theta, timeout=.5)
 
             cv2.imshow("img", img)
             cv2.waitKey(10)
