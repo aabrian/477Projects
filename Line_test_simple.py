@@ -63,7 +63,10 @@ if __name__ == '__main__':
             K=np.array([[184.752*kk, 0, 320], [0, 184.752*kk, 180], [0, 0, 1]])
 
             results = at_detector.detect(gray, estimate_tag_pose=False)
+            print(results)
+            if results == []:
 
+                print('flag')
             for res in results:
                 pose = find_pose_from_tag(K, res)
                 rot_ca, jaco = cv2.Rodrigues(pose[1], pose[1])
@@ -88,7 +91,7 @@ if __name__ == '__main__':
                 cv2.circle(img, tuple(res.center.astype(np.int32)), 5, (0, 0, 255), -1)
                 pose[0][1]= 0
                 Tag_loc = pose[0]
-                Dtag_loc = [0, 0, -1]
+                Dtag_loc = [0, 0, 1]
                 # print("Tag location ", Tag_loc)
                 # print("Desired Tag location ", Dtag_loc)
                 Tag_loc = Tag_loc/np.linalg.norm(Tag_loc)
@@ -101,13 +104,18 @@ if __name__ == '__main__':
                 print(cross_product_AB)
                 if pose[0][0] < 0:
                     theta = -(np.arctan2(mag_cross, dot_AB))*180/np.pi
-                    #print("theta: ", theta)
+                    print("theta: ", theta)
                 else:
                     theta = (np.arctan2(mag_cross, dot_AB))*180/np.pi
-                    #print("theta: ", theta)
-                kt = 11
-                ep_chassis.drive_speed(x = v_b[1], y = v_b[0], z=kt*cross_product_AB[1], timeout=.5)
+                    print("theta: ", theta)
+                kt = 12
+                RT_matrix = np.array([ [cos(theta*pi/180), -sin(theta*pi/180), 0],[sin(theta*pi/180), cos(theta*pi/180),0],[0,0,1]] )
+                robot_vel = np.matmul(RT_matrix,v_w)
+                print('robot frame vel = ',robot_vel)
+                ep_chassis.drive_speed(x = robot_vel[1], y = robot_vel[0], z=0, timeout=.5)
                 # ep_chassis.drive_speed(x = -v_b[1], y = v_b[0], z=0, timeout=.5)
+
+
             cv2.imshow("img", img)
             cv2.waitKey(10)
            
