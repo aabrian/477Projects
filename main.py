@@ -8,6 +8,7 @@ from robomaster import camera
 from math import(sin, cos, asin, pi, atan2, atan, acos)
 
 time_step = 3
+k_time = 15/time_step
 t_run = 0
 last_step = 0
 final_range = 0.05
@@ -235,10 +236,11 @@ if __name__ == '__main__':
             K=np.array([[184.752*kk, 0, 320], [0, 184.752*kk, 180], [0, 0, 1]])
 
             results = at_detector.detect(gray, estimate_tag_pose=False)
-           
+            if len(results) == 0:
+                ep_chassis.drive_speed(x = 0, y = 0, z=10, timeout=5)
 
             for res in results:
-                if t_run > last_step + 5*time_step:
+                if t_run > last_step + k_time*time_step:
                     new_tag = (res.tag_id)
                     last_step = t_run
                 elif t_run == 0:
@@ -316,9 +318,6 @@ if __name__ == '__main__':
                 ep_chassis.drive_speed(x = v_b[1], y = v_b[0], z=kt*theta, timeout=.5)
 
                 t_run = t_run + time_step/interval
-
-
-
 
 
             cv2.imshow("img", img)

@@ -86,7 +86,8 @@ if __name__ == '__main__':
             K=np.array([[184.752*kk, 0, 320], [0, 184.752*kk, 180], [0, 0, 1]])
 
             results = at_detector.detect(gray, estimate_tag_pose=False)
-           
+            if len(results) == 0:
+                ep_chassis.drive_speed(x = 0, y = 0, z=10, timeout=.5)
 
             for res in results:
                 if t_run > last_step + 5*time_step:
