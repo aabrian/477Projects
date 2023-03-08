@@ -88,7 +88,7 @@ if __name__ == '__main__':
                 cv2.circle(img, tuple(res.center.astype(np.int32)), 5, (0, 0, 255), -1)
                 pose[0][1]= 0
                 Tag_loc = pose[0]
-                Dtag_loc = [0, 0, 1]
+                Dtag_loc = [0, 0, -1]
                 # print("Tag location ", Tag_loc)
                 # print("Desired Tag location ", Dtag_loc)
                 Tag_loc = Tag_loc/np.linalg.norm(Tag_loc)
