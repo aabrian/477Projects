@@ -137,3 +137,5 @@ if __name__ == '__main__':
         path.append((.265*new_x,.265*new_y,t))
         x = new_x
         y = new_y
+    print(path)
+    print(interp(2.1))

@@ -5,6 +5,13 @@ import time
 from robomaster import robot
 from robomaster import camera
 
+time_step = 3
+t_run = 0
+last_step = 0
+final_range = 0.05
+interval = 10
+current_tag = 32
+
 at_detector = Detector(
     families="tag36h11",
     nthreads=1,
@@ -82,7 +89,16 @@ if __name__ == '__main__':
            
 
             for res in results:
-                current_tag = (res.tag_id)
+                if t_run > last_step + 5*time_step:
+                    new_tag = (res.tag_id)
+                    last_step = t_run
+                elif t_run == 0:
+                    new_tag = (res.tag_id)
+                else:
+                    new_tag = current_tag
+                
+                current_tag = new_tag
+
                 pose = find_pose_from_tag(K, res)
                 rot, jaco = cv2.Rodrigues(pose[1], pose[1])
                 # print(rot)
@@ -92,9 +108,9 @@ if __name__ == '__main__':
                 # print((pose[0]))
                 print(current_tag)
                 world_pose = find_robot_pos(tag_coords[current_tag],tag_orientation[current_tag],pose[0])
-                print(world_pose)
+                # print(world_pose)
 
-                time.sleep(1)
+                t_run = t_run + time_step/interval
 
 
 

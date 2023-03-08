@@ -1,14 +1,18 @@
 from pupil_apriltags import Detector
 import cv2
+import csv
 import numpy as np
 import time
 from robomaster import robot
 from robomaster import camera
 from math import(sin, cos, asin, pi, atan2, atan, acos)
 
-time_step = 5
+time_step = 3
 t_run = 0
+last_step = 0
 final_range = 0.05
+interval = 10
+current_tag = 32
 
 def check_surr(c): # open function to check if open in maze in 8 directions
     m = []
@@ -134,7 +138,15 @@ def find_robot_pos(tag_coord,tag_orientation,robot_tag_pose):
         
     return world_pos
 
-def rotation_wa(theta):
+def rotation_wa(direction):
+    if direction == 'right':
+        theta = 0
+    elif direction == 'left':
+        theta = np.pi
+    elif direction == 'down':
+        theta = np.pi/2
+    elif direction == 'up':
+        theta = 3*np.pi/2
     rot = np.array([[sin(theta),cos(theta),0], [0,0,-1], [-cos(theta),sin(theta),0]])
     return np.linalg.inv(rot)
 
@@ -161,7 +173,7 @@ if __name__ == '__main__':
 
     # Dijkstra Algorithm
 
-    costs = numpy.zeros([numrows,numcols], dtype = int)
+    costs = np.zeros([numrows,numcols], dtype = int)
     costs[numrows-(goal_y+1)][goal_x] = 1 # add a one to ending point in costs
     visited = [(goal_x,goal_y)]
     n = 1
@@ -226,9 +238,18 @@ if __name__ == '__main__':
            
 
             for res in results:
-                current_tag = (res.tag_id)
+                if t_run > last_step + 5*time_step:
+                    new_tag = (res.tag_id)
+                    last_step = t_run
+                elif t_run == 0:
+                    new_tag = (res.tag_id)
+                else:
+                    new_tag = current_tag
+                
+                current_tag = new_tag
+                
                 pose = find_pose_from_tag(K, res)
-                rot, jaco = cv2.Rodrigues(pose[1], pose[1])
+                rot_ca, jaco = cv2.Rodrigues(pose[1], pose[1])
 
                 pts = res.corners.reshape((-1, 1, 2)).astype(np.int32)
                 img = cv2.polylines(img, [pts], isClosed=True, color=(0, 0, 255), thickness=5)
@@ -238,11 +259,10 @@ if __name__ == '__main__':
                 world_pose = find_robot_pos(tag_coords[current_tag],tag_orientation[current_tag],pose[0])
                 
 
-
                 # Feedback Loop to get desired world velocity
                 K = 1
-                x_pos_des = interp(t)[0]
-                y_pos_des = interp(t)[1]
+                x_pos_des = interp(t_run)[0]
+                y_pos_des = interp(t_run)[1]
                 curr_x = world_pose[0]
                 curr_y = world_pose[1]
 
@@ -258,11 +278,44 @@ if __name__ == '__main__':
 
 
                 # Converting to v_b
+                rot_wa = rotation_wa(tag_orientation[current_tag])
+                rot_ac = np.transpose(rot_ca)
+                rot_wc = np.matmul(rot_wa, rot_ac)
+                rot_bc = np.array([[0, 0, 1], [1, 0, 0], [0, -1, 0]])
+                w2b = np.matmul(rot_bc,np.transpose(rot_wc))
+                kb = 0.5
+                v_b = kb*np.matmul(w2b,v_w)
 
 
                 # Finding correct heading
+                pose[0][1]= 0
+                Tag_loc = pose[0]
+                if tag_orientation[current_tag] == 'right':
+                    Dtag_loc = [0, 0, 1]
+                elif tag_orientation[current_tag] == 'left':
+                    Dtag_loc = [0, 0, 1]
+                elif tag_orientation[current_tag] == 'down':
+                    Dtag_loc = [0, 0, 1]
+                elif tag_orientation[current_tag] == 'up':
+                    Dtag_loc = [0, 0, 1]
+                
+
+                cross_product_AB = np.cross(Tag_loc, Dtag_loc)
+                mag_cross = np.linalg.norm(cross_product_AB)
+            
+                dot_AB = np.dot(Tag_loc,Dtag_loc)
+
+
+                if pose[0][0] < 0:
+                    theta = -(np.arctan2(mag_cross, dot_AB))*180/np.pi
+                else:
+                    theta = (np.arctan2(mag_cross, dot_AB))*180/np.pi
+                kt = 1
 
                 # Movement
+                ep_chassis.drive_speed(x = v_b[1], y = v_b[0], z=kt*theta, timeout=.5)
+
+                t_run = t_run + time_step/interval
 
 
 
