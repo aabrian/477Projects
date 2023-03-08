@@ -2,6 +2,7 @@ from pupil_apriltags import Detector
 import cv2
 import numpy as np
 import time
+import csv
 from robomaster import robot
 from robomaster import camera
 
@@ -154,7 +155,7 @@ if __name__ == '__main__':
 
     # Dijkstra Algorithm
 
-    costs = numpy.zeros([numrows,numcols], dtype = int)
+    costs = np.zeros([numrows,numcols], dtype = int)
     costs[numrows-(goal_y+1)][goal_x] = 1 # add a one to ending point in costs
     visited = [(goal_x,goal_y)]
     n = 1
