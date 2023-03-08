@@ -4,8 +4,11 @@ import numpy as np
 import time
 from robomaster import robot
 from robomaster import camera
+from math import(sin, cos, asin, pi, atan2, atan, acos)
 
-time_step = 1
+time_step = 5
+t_run = 0
+final_range = 0.05
 
 def check_surr(c): # open function to check if open in maze in 8 directions
     m = []
@@ -131,6 +134,10 @@ def find_robot_pos(tag_coord,tag_orientation,robot_tag_pose):
         
     return world_pos
 
+def rotation_wa(theta):
+    rot = np.array([[sin(theta),cos(theta),0], [0,0,-1], [-cos(theta),sin(theta),0]])
+    return np.linalg.inv(rot)
+
 if __name__ == '__main__':
     # Creating interpolation and desired path
     file = csv.reader(open(rb'C:\Users\jsche\OneDrive - University of Maryland\Spring 2023\CMSC477\Project1\map.csv'), delimiter=',')
@@ -221,16 +228,42 @@ if __name__ == '__main__':
                 current_tag = (res.tag_id)
                 pose = find_pose_from_tag(K, res)
                 rot, jaco = cv2.Rodrigues(pose[1], pose[1])
-                # print(rot)
+
                 pts = res.corners.reshape((-1, 1, 2)).astype(np.int32)
                 img = cv2.polylines(img, [pts], isClosed=True, color=(0, 0, 255), thickness=5)
                 cv2.circle(img, tuple(res.center.astype(np.int32)), 5, (0, 0, 255), -1)
-                # print((pose[0]))
-                print(current_tag)
-                world_pose = find_robot_pos(tag_coords[current_tag],tag_orientation[current_tag],pose[0])
-                print(world_pose)
 
-                time.sleep(1)
+                # Current position [x,y]
+                world_pose = find_robot_pos(tag_coords[current_tag],tag_orientation[current_tag],pose[0])
+                
+
+
+                # Feedback Loop to get desired world velocity
+                K = 1
+                x_pos_des = interp(t)[0]
+                y_pos_des = interp(t)[1]
+                curr_x = world_pose[0]
+                curr_y = world_pose[1]
+
+                # Feedfoward
+                x_vel_des = derivative(t)[0]
+                y_vel_des = derivative(t)[1]
+
+                # Control Law
+                output_x = K*(x_pos_des - curr_x) + x_vel_des
+                output_y = K*(y_pos_des - curr_y) + y_vel_des
+                v_w = np.array([output_x,output_y,0])
+
+
+
+                # Converting to v_b
+
+
+                # Finding correct heading
+
+                # Movement
+
+
 
 
 
