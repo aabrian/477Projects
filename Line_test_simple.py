@@ -88,26 +88,26 @@ if __name__ == '__main__':
                 cv2.circle(img, tuple(res.center.astype(np.int32)), 5, (0, 0, 255), -1)
                 pose[0][1]= 0
                 Tag_loc = pose[0]
-                Dtag_loc = [1, 0, 0]
+                Dtag_loc = [0, 0, -1]
                 # print("Tag location ", Tag_loc)
                 # print("Desired Tag location ", Dtag_loc)
-
+                Tag_loc = Tag_loc/np.linalg.norm(Tag_loc)
                 cross_product_AB = np.cross(Tag_loc, Dtag_loc)
                 mag_cross = np.linalg.norm(cross_product_AB)
             
                 dot_AB = np.dot(Tag_loc,Dtag_loc)
                 # print("dot product", dot_AB)
 
-
+                print(cross_product_AB)
                 if pose[0][0] < 0:
                     theta = -(np.arctan2(mag_cross, dot_AB))*180/np.pi
                     #print("theta: ", theta)
                 else:
                     theta = (np.arctan2(mag_cross, dot_AB))*180/np.pi
                     #print("theta: ", theta)
-                kt = 1
-                ep_chassis.drive_speed(x = v_b[1], y = v_b[0], z=kt*theta, timeout=.5)
-
+                kt = 11
+                ep_chassis.drive_speed(x = v_b[1], y = v_b[0], z=kt*cross_product_AB[1], timeout=.5)
+                # ep_chassis.drive_speed(x = -v_b[1], y = v_b[0], z=0, timeout=.5)
             cv2.imshow("img", img)
             cv2.waitKey(10)
            
@@ -116,5 +116,3 @@ if __name__ == '__main__':
             ep_robot.close()
             print ('Exiting')
             exit(1)
-
-
