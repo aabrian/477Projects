@@ -99,6 +99,7 @@ if __name__ == '__main__':
                     new_tag = current_tag
                 
                 current_tag = new_tag
+                print(current_tag)
 
                 pose = find_pose_from_tag(K, res)
                 rot, jaco = cv2.Rodrigues(pose[1], pose[1])
