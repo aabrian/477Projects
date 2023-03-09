@@ -59,7 +59,7 @@ if __name__ == '__main__':
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             gray.astype(np.uint8)
 
-            kk = 1
+            kk = 1.7
             K=np.array([[184.752*kk, 0, 320], [0, 184.752*kk, 180], [0, 0, 1]])
 
             results = at_detector.detect(gray, estimate_tag_pose=False)
@@ -88,7 +88,7 @@ if __name__ == '__main__':
                 cv2.circle(img, tuple(res.center.astype(np.int32)), 5, (0, 0, 255), -1)
                 pose[0][1]= 0
                 Tag_loc = pose[0]
-                Dtag_loc = [0, 0, 1]
+                Dtag_loc = [1, 0, 0]
                 # print("Tag location ", Tag_loc)
                 # print("Desired Tag location ", Dtag_loc)
 
@@ -101,12 +101,15 @@ if __name__ == '__main__':
 
                 if pose[0][0] < 0:
                     theta = -(np.arctan2(mag_cross, dot_AB))*180/np.pi
-                    # print("theta: ", theta)
+                    #print("theta: ", theta)
                 else:
                     theta = (np.arctan2(mag_cross, dot_AB))*180/np.pi
-                    # print("theta: ", theta)
+                    #print("theta: ", theta)
                 kt = 1
+<<<<<<< HEAD
                 print("x ", v_b[1], " y ",v_b[0], "z ", theta )
+=======
+>>>>>>> 79708ed268728d858d7f17f30d9846ad465b2817
                 ep_chassis.drive_speed(x = v_b[1], y = v_b[0], z=kt*theta, timeout=.5)
 
             cv2.imshow("img", img)

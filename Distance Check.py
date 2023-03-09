@@ -5,6 +5,13 @@ import time
 from robomaster import robot
 from robomaster import camera
 
+time_step = 3
+t_run = 0
+last_step = 0
+final_range = 0.05
+interval = 10
+current_tag = 32
+
 at_detector = Detector(
     families="tag36h11",
     nthreads=1,
@@ -66,7 +73,7 @@ if __name__ == '__main__':
     tag_size=0.2 # tag size in meters
     l = .265
     tag_coords = {32 : [-8.5*l,0],34:[-8*l,-1.5*l],33:[-7.5*l,0],31:[-7.5*l,2*l],35:[-6*l,2.5*l],
-36:[-4*l,2.5*l],42:[-2.5*l,2*l],44:[-2.5*l,0],46:[-2*l,-1.5*l],45:[-1.5*l,0],39:[-4.5*l,-2*l],41:[-4.5*l,-4*l],43:[-1.5*l,2*l],37:[-5*l,-0.5*l]}
+36:[-4*l,2.5*l],42:[-2.5*l,2*l],44:[-2.5*l,0],46:[-2*l,-1.5*l],45:[-1.5*l,0],39:[-4.5*l,-2*l],41:[-4.5*l,-4*l],43:[-1.5*l,2*l],37:[-5*l,-0.5*l],30:[-8.5*l,2*l],40:[-5.5*l,-2*l],}
     tag_orientation  = {30:'left',32:'left',34:'down',33:'right',31:'right',35:'down',36:'down',42:'left',
                         44:'left',46:'down',45:'right',43:'right',37:'up',38:'left',40:'left',39:'right',41:'right'}
     while True:
@@ -75,13 +82,25 @@ if __name__ == '__main__':
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             gray.astype(np.uint8)
 
-            K=np.array([[184.752, 0, 320], [0, 184.752, 180], [0, 0, 1]])
+            kk = 1.7
+            K=np.array([[184.752*kk, 0, 320], [0, 184.752*kk, 180], [0, 0, 1]])
 
             results = at_detector.detect(gray, estimate_tag_pose=False)
-           
+            if len(results) == 0:
+                ep_chassis.drive_speed(x = 0, y = 0, z=10, timeout=.5)
 
             for res in results:
-                current_tag = (res.tag_id)
+                if t_run > last_step + 5*time_step:
+                    new_tag = (res.tag_id)
+                    last_step = t_run
+                elif t_run == 0:
+                    new_tag = (res.tag_id)
+                else:
+                    new_tag = current_tag
+                
+                current_tag = new_tag
+                print(current_tag)
+
                 pose = find_pose_from_tag(K, res)
                 rot, jaco = cv2.Rodrigues(pose[1], pose[1])
                 # print(rot)
@@ -91,9 +110,9 @@ if __name__ == '__main__':
                 # print((pose[0]))
                 print(current_tag)
                 world_pose = find_robot_pos(tag_coords[current_tag],tag_orientation[current_tag],pose[0])
-                print(world_pose)
+                # print(world_pose)
 
-                time.sleep(1)
+                t_run = t_run + time_step/interval
 
 
 
