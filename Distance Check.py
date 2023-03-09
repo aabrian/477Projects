@@ -75,7 +75,7 @@ if __name__ == '__main__':
     tag_coords = {32 : [-8.5*l,0],34:[-8*l,-1.5*l],33:[-7.5*l,0],31:[-7.5*l,2*l],35:[-6*l,2.5*l],
     36:[-4*l,2.5*l],42:[-2.5*l,2*l],44:[-2.5*l,0],46:[-2*l,-1.5*l],45:[-1.5*l,0],39:[-4.5*l,-2*l],41:[-4.5*l,-4*l],43:[-1.5*l,2*l],37:[-5*l,-0.5*l],30:[-8.5*l,2*l],38:[-5.5*l,-2*l],40:[-5.5*l,-4*l]}
     tag_orientation  = {30:'left',32:'left',34:'down',33:'right',31:'right',35:'down',36:'down',42:'left',
-                        44:'left',46:'down',45:'right',43:'right',37:'up',38:'left',40:'left',39:'right',41:'right'}
+                        44:'left',46:'down',45:'right',43:'right',37:'up',38:'left',40:'left',39:'right',41:'right',13:'right'}
     while True:
         try:
             img = ep_camera.read_cv2_image(strategy="newest", timeout=2)   
@@ -90,7 +90,7 @@ if __name__ == '__main__':
                 ep_chassis.drive_speed(x = 0, y = 0, z=10, timeout=.5)
 
             for res in results:
-                if t_run > last_step + 5*time_step:
+                if t_run > last_step + time_step:
                     new_tag = (res.tag_id)
                     last_step = t_run
                 elif t_run == 0:
@@ -105,6 +105,7 @@ if __name__ == '__main__':
                     t_run = t_run - 0.5
                     print('Critical Tag Found, Tunring 90 degrees')
                 pose = find_pose_from_tag(K, res)
+                print(pose[0])
                 rot, jaco = cv2.Rodrigues(pose[1], pose[1])
                 # print(rot)
                 pts = res.corners.reshape((-1, 1, 2)).astype(np.int32)
@@ -113,7 +114,7 @@ if __name__ == '__main__':
                 # print((pose[0]))
                 print(current_tag)
                 world_pose = find_robot_pos(tag_coords[current_tag],tag_orientation[current_tag],pose[0])
-                # print(world_pose)
+                print(world_pose)
 
                 t_run = t_run + time_step/interval
                 time.sleep(0.5)

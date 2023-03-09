@@ -229,7 +229,7 @@ if __name__ == '__main__':
     l = .265
     
     tag_coords = {32 : [-8.5*l,0],34:[-8*l,-1.5*l],33:[-7.5*l,0],31:[-7.5*l,2*l],35:[-6*l,2.5*l],
-    36:[-4*l,2.5*l],42:[-2.5*l,2*l],44:[-2.5*l,0],46:[-2*l,-1.5*l],45:[-1.5*l,0],39:[-4.5*l,-2*l],41:[-4.5*l,-4*l],43:[-1.5*l,2*l],37:[-5*l,-0.5*l],30:[-8.5*l,2*l],40:[-5.5*l,-2*l],13:[-1.5*l,l]}
+    36:[-4*l,2.5*l],42:[-2.5*l,2*l],44:[-2.5*l,0],46:[-2*l,-1.5*l],45:[-1.5*l,0],39:[-4.5*l,-2*l],41:[-4.5*l,-4*l],43:[-1.5*l,2*l],37:[-5*l,-0.5*l],30:[-8.5*l,2*l],38:[-5.5*l,-2*l],40:[-5.5*l,-4*l]}
     tag_orientation  = {30:'left',32:'left',34:'down',33:'right',31:'right',35:'down',36:'down',42:'left',
                         44:'left',46:'down',45:'right',43:'right',37:'up',38:'left',40:'left',39:'right',41:'right',13:'right'}
     while True:
@@ -247,7 +247,7 @@ if __name__ == '__main__':
                 ep_chassis.drive_speed(x = 0, y = 0, z=10, timeout=5)
 
             for res in results:
-                if t_run > last_step + k_time*time_step:
+                if t_run > last_step + time_step:
                     new_tag = (res.tag_id)
                     last_step = t_run
                 elif t_run == 0:
@@ -256,19 +256,19 @@ if __name__ == '__main__':
                     new_tag = current_tag
                 
                 current_tag = new_tag
-
+                print(current_tag)
                 ## Checking if tag id match tags of interest and turning at these
 
                 if current_tag == 34 and counter1 == 0: # rotate 90 degrees 90 degrees if tag 34 seen
                     time.sleep(1) # want the last velocity command to continue moving so gives robot space
                     t_run = t_run - 0.5 # don't want to mess up timing
-                    ep_chassis.move(x = 0, y = 0, z = 90, z_speed = 30).wait_for_completed()
+                    ep_chassis.move(x = 0, y = 0, z = 45, z_speed = 30).wait_for_completed()
                     counter1 = 1
 
                 if current_tag == 45 and counter2 == 0: # rotate 90 degrees 90 degrees if tag 45 seen
                     time.sleep(1) # want the last velocity command to continue moving so gives robot space
                     t_run = t_run - 0.5 # don't want to mess up timing
-                    ep_chassis.move(x = 0, y = 0, z = 90, z_speed = 30).wait_for_completed()
+                    ep_chassis.move(x = 0, y = 0, z = 45, z_speed = 30).wait_for_completed()
                     counter2 = 0
 
                 
@@ -284,7 +284,7 @@ if __name__ == '__main__':
                 
 
                 # Feedback Loop to get desired world velocity
-                Kc = 1
+                Kc = .1
                 x_pos_des = interp(t_run)[0]
                 y_pos_des = interp(t_run)[1]
                 curr_x = world_pose[0]
@@ -303,7 +303,8 @@ if __name__ == '__main__':
                 output_x = Kc*(x_pos_des - curr_x) + x_vel_des
                 output_y = Kc*(y_pos_des - curr_y) + y_vel_des
                 v_w = np.array([output_x,output_y,0])
-
+                print(x_pos_des - curr_x,y_pos_des - curr_y)
+                print(v_w)
 
                 # Converting to v_b
                 rot_wa = rotation_wa(tag_orientation[current_tag])
@@ -311,7 +312,7 @@ if __name__ == '__main__':
                 rot_wc = np.matmul(rot_wa, rot_ac)
                 rot_bc = np.array([[0, 0, 1], [1, 0, 0], [0, -1, 0]])
                 w2b = np.matmul(rot_bc,np.transpose(rot_wc))
-                kb = 0.1
+                kb = 1
                 v_b = kb*np.matmul(w2b,v_w)
                 print(v_b)
 
@@ -343,7 +344,7 @@ if __name__ == '__main__':
                 #############################################
                 # Movement
                 ep_chassis.drive_speed(x = v_b[1], y = v_b[0], z=0, timeout=1)
-                time.sleep(0.5)
+                time.sleep(0.25)
 
                 t_run = t_run + time_step/interval
 
