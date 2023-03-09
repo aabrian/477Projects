@@ -155,6 +155,14 @@ def rotation_wa(direction):
     rot = np.array([[sin(theta),cos(theta),0], [0,0,-1], [-cos(theta),sin(theta),0]])
     return np.linalg.inv(rot)
 
+def find_pose():
+    pose = find_pose_from_tag(K, res)
+    print(pose[0])
+    # rot, jaco = cv2.Rodrigues(pose[1], pose[1])
+    pts = res.corners.reshape((-1, 1, 2)).astype(np.int32)
+    img = cv2.polylines(img, [pts], isClosed=True, color=(0, 0, 255), thickness=5)
+    cv2.circle(img, tuple(res.center.astype(np.int32)), 5, (0, 0, 255), -1)
+    return pose[0]
 
 if __name__ == '__main__':
     # Creating interpolation and desired path
@@ -239,6 +247,7 @@ if __name__ == '__main__':
     36:[-4*l,2.5*l],42:[-2.5*l,2*l],44:[-2.5*l,0],46:[-2*l,-1.5*l],45:[-1.5*l,0],39:[-4.5*l,-2*l],41:[-4.5*l,-4*l],43:[-1.5*l,2*l],37:[-5*l,-0.5*l],30:[-8.5*l,2*l],38:[-5.5*l,-2*l],40:[-5.5*l,-4*l]}
     tag_orientation  = {30:'left',32:'left',34:'down',33:'right',31:'right',35:'down',36:'down',42:'left',
                         44:'left',46:'down',45:'right',43:'right',37:'up',38:'left',40:'left',39:'right',41:'right',13:'right'}
+    counter = 0
     while True:
         try:
             img = ep_camera.read_cv2_image(strategy="newest", timeout=2)   
@@ -253,113 +262,43 @@ if __name__ == '__main__':
             if len(results) == 0:
                 ep_chassis.move(x = 0, y = 0, z = 45, z_speed = 30).wait_for_completed()
 
-            poses = []
             for res in results:
-                # if t_run > last_step + time_step and res.tag_id != 40:
-                #     new_tag = (res.tag_id)
-                #     last_step = t_run
-                # if res.tag_id != 40:
-                #     new_tag = (res.tag_id)
-                # else:
-                #     new_tag = current_tag
-                
-                current_tag = res.tag_id
-                print(current_tag)
-                ## Checking if tag id match tags of interest and turning at these
-
-                if current_tag == 34 and counter1 == 0: # rotate 90 degrees 90 degrees if tag 34 seen
-                    time.sleep(1) # want the last velocity command to continue moving so gives robot space
-                    t_run = t_run - 0.5 # don't want to mess up timing
-                    ep_chassis.move(x = 0, y = 0, z = 45, z_speed = 30).wait_for_completed()
-                    counter1 = 1
-
-                if current_tag == 45 and counter2 == 0: # rotate 90 degrees 90 degrees if tag 45 seen
-                    time.sleep(1) # want the last velocity command to continue moving so gives robot space
-                    t_run = t_run - 0.5 # don't want to mess up timing
-                    ep_chassis.move(x = 0, y = 0, z = 45, z_speed = 30).wait_for_completed()
-                    counter2 = 0
-
-                
-                pose = find_pose_from_tag(K, res)
-                rot_ca, jaco = cv2.Rodrigues(pose[1], pose[1])
-
-                pts = res.corners.reshape((-1, 1, 2)).astype(np.int32)
-                img = cv2.polylines(img, [pts], isClosed=True, color=(0, 0, 255), thickness=5)
-                cv2.circle(img, tuple(res.center.astype(np.int32)), 5, (0, 0, 255), -1)
-
-                # Current position [x,y]
-                world_pose = find_robot_pos(tag_coords[current_tag],tag_orientation[current_tag],pose[0])
-                poses.append(world_pose)
-                
-                if current_tag == 45:
-                    if curr_y < .05 or curr_y > -.05: # if y coordinate of robot camera even with goal, exit program
-                        ep_chassis.drive_speed(x = v_b[1], y = v_b[0], z=0, timeout=1)
+                if counter == 1:
+                    ep_chassis.drive_speed(x = 0, y = 0.25, z=0, timeout=5)
+                if counter == 1 and res.tag_id == 38:
+                    if find_pose()[0] < -0.22:
+                        # Go forward
+                        counter = counter + 1
+                        ep_chassis.drive_speed(x = 0.25, y = 0, z=0, timeout=5)
+                if counter == 2 and res.tag_id == 38:
+                    if find_pose()[2] < 0.5:
+                        # Turn 90 degrees CCW, go forward
+                        counter = counter + 1
+                        ep_chassis.move(x = 0, y = 0, z = 45, z_speed = 30).wait_for_completed()
+                        ep_chassis.drive_speed(x = 0.25, y = 0, z=0, timeout=5)
+                if counter == 3 and res.tag_id == 35:
+                    if find_pose()[2] < 0.62:
+                        # Turn 90 degrees CW, Go forward
+                        counter = counter + 1
+                        ep_chassis.move(x = 0, y = 0, z = -45, z_speed = 30).wait_for_completed()
+                        ep_chassis.drive_speed(x = 0.25, y = 0, z=0, timeout=5)
+                if counter == 4 and res.tag_id == 44:
+                    if find_pose()[2] < 0.5:
+                        # Turn 180 degrees, Go left
+                        counter = counter + 1
+                        ep_chassis.move(x = 0, y = 0, z = -45, z_speed = 30).wait_for_completed()
+                        ep_chassis.drive_speed(x = 0, y = -0.25, z=0, timeout=5)
+                if counter == 5 and res.tag_id == 39:
+                    if find_pose()[0] > 0.22:
+                        counter = counter + 1
+                if counter == 6 and res.tag_id == 39:
+                    if find_pose()[2] > 1.4:
+                        counter = counter + 1
+                        ep_chassis.drive_speed(x = 0, y = 0.25, z=0, timeout=5)
+                if counter == 7 and res.tag_id == 45:
+                    if find_pose()[0] < 0.05:
+                        ep_chassis.drive_speed(x = 0, y = 0, z=0, timeout=5)
                         exit(1)
-
-                ############### NOT USING ##################
-                # # Finding correct heading
-                # pose[0][1]= 0
-                # Tag_loc = pose[0]
-                # if tag_orientation[current_tag] == 'right':
-                #     Dtag_loc = [0, 0, 1]
-                # elif tag_orientation[current_tag] == 'left':
-                #     Dtag_loc = [0, 0, 1]
-                # elif tag_orientation[current_tag] == 'down':
-                #     Dtag_loc = [0, 0, 1]
-                # elif tag_orientation[current_tag] == 'up':
-                #     Dtag_loc = [0, 0, 1]
-                
-
-                # cross_product_AB = np.cross(Tag_loc, Dtag_loc)
-                # mag_cross = np.linalg.norm(cross_product_AB)
-            
-                # dot_AB = np.dot(Tag_loc,Dtag_loc)
-
-
-                # if pose[0][0] < 0:
-                #     theta = -(np.arctan2(mag_cross, dot_AB))*180/np.pi
-                # else:
-                #     theta = (np.arctan2(mag_cross, dot_AB))*180/np.pi
-                # kt = 1
-                #############################################
-            
-            # Feedback Loop to get desired world velocity
-            if len(poses) > 0:
-                Kc = .1
-                x_pos_des = interp(t_run)[0]
-                y_pos_des = interp(t_run)[1]
-                sum_x = 0
-                sum_y = 0
-                print(poses)
-                for i in range(len(poses)):
-                    sum_x = sum_x + poses[i][0]
-                    sum_y = sum_y + poses[i][1]
-                curr_x = sum_x/len(poses)
-                curr_y = sum_y/len(poses)
-                print(curr_x,curr_y)
-
-                # Feedfoward
-                x_vel_des = derivative(t_run)[0]
-                y_vel_des = derivative(t_run)[1]
-
-                # Control Law
-                output_x = Kc*(x_pos_des - curr_x) + x_vel_des
-                output_y = Kc*(y_pos_des - curr_y) + y_vel_des
-                v_w = np.array([output_x,output_y,0])
-
-                # Converting to v_b
-                rot_wa = rotation_wa(tag_orientation[current_tag])
-                rot_ac = np.transpose(rot_ca)
-                rot_wc = np.matmul(rot_wa, rot_ac)
-                rot_bc = np.array([[0, 0, 1], [1, 0, 0], [0, -1, 0]])
-                w2b = np.matmul(rot_bc,np.transpose(rot_wc))
-                kb = 1
-                v_b = kb*np.matmul(w2b,v_w)
-
-                ep_chassis.drive_speed(x = v_b[1], y = v_b[0], z=0, timeout=1)
-                time.sleep(0.25)
-
-                t_run = t_run + time_step/interval
 
             cv2.imshow("img", img)
             cv2.waitKey(10)

@@ -86,38 +86,33 @@ if __name__ == '__main__':
             K=np.array([[184.752*kk, 0, 320], [0, 184.752*kk, 180], [0, 0, 1]])
 
             results = at_detector.detect(gray, estimate_tag_pose=False)
-            if len(results) == 0:
-                ep_chassis.drive_speed(x = 0, y = 0, z=10, timeout=.5)
+            # if len(results) == 0:
+            #     ep_chassis.drive_speed(x = 0, y = 0, z=10, timeout=.5)
 
             for res in results:
-                if t_run > last_step + time_step:
-                    new_tag = (res.tag_id)
-                    last_step = t_run
-                elif t_run == 0:
-                    new_tag = (res.tag_id)
-                else:
-                    new_tag = current_tag
-                
-                current_tag = new_tag
-                print(current_tag)
-                if current_tag == 34 or current_tag == 45:
-                    time.sleep(0.5)
-                    t_run = t_run - 0.5
-                    print('Critical Tag Found, Tunring 90 degrees')
-                pose = find_pose_from_tag(K, res)
-                print(pose[0])
-                rot, jaco = cv2.Rodrigues(pose[1], pose[1])
-                # print(rot)
-                pts = res.corners.reshape((-1, 1, 2)).astype(np.int32)
-                img = cv2.polylines(img, [pts], isClosed=True, color=(0, 0, 255), thickness=5)
-                cv2.circle(img, tuple(res.center.astype(np.int32)), 5, (0, 0, 255), -1)
-                # print((pose[0]))
-                print(current_tag)
-                world_pose = find_robot_pos(tag_coords[current_tag],tag_orientation[current_tag],pose[0])
-                print(world_pose)
+                if res.tag_id == 45:
 
-                t_run = t_run + time_step/interval
-                time.sleep(0.5)
+                
+                    current_tag = res.tag_id
+                    # print(current_tag)
+                    if current_tag == 34 or current_tag == 45:
+                        time.sleep(0.5)
+                        t_run = t_run - 0.5
+                        print('Critical Tag Found, Tunring 90 degrees')
+                    pose = find_pose_from_tag(K, res)
+                    print(pose[0])
+                    rot, jaco = cv2.Rodrigues(pose[1], pose[1])
+                    # print(rot)
+                    pts = res.corners.reshape((-1, 1, 2)).astype(np.int32)
+                    img = cv2.polylines(img, [pts], isClosed=True, color=(0, 0, 255), thickness=5)
+                    cv2.circle(img, tuple(res.center.astype(np.int32)), 5, (0, 0, 255), -1)
+                    # print((pose[0]))
+                    # print(current_tag)
+                    world_pose = find_robot_pos(tag_coords[current_tag],tag_orientation[current_tag],pose[0])
+                    # print(world_pose)
+
+                    t_run = t_run + time_step/interval
+                    time.sleep(0.5)
 
 
 
