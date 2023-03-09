@@ -90,7 +90,7 @@ if __name__ == '__main__':
             #     ep_chassis.drive_speed(x = 0, y = 0, z=10, timeout=.5)
 
             for res in results:
-                if res.tag_id == 45:
+                if res.tag_id == 46:
 
                 
                     current_tag = res.tag_id

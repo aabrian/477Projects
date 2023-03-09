@@ -155,15 +155,6 @@ def rotation_wa(direction):
     rot = np.array([[sin(theta),cos(theta),0], [0,0,-1], [-cos(theta),sin(theta),0]])
     return np.linalg.inv(rot)
 
-def find_pose():
-    pose = find_pose_from_tag(K, res)
-    print(pose[0])
-    # rot, jaco = cv2.Rodrigues(pose[1], pose[1])
-    pts = res.corners.reshape((-1, 1, 2)).astype(np.int32)
-    img = cv2.polylines(img, [pts], isClosed=True, color=(0, 0, 255), thickness=5)
-    cv2.circle(img, tuple(res.center.astype(np.int32)), 5, (0, 0, 255), -1)
-    return pose[0]
-
 if __name__ == '__main__':
     # Creating interpolation and desired path
     file = csv.reader(open(rb'C:\Users\jsche\OneDrive - University of Maryland\Spring 2023\CMSC477\Project1\Shared\477Project1\map.csv'), delimiter=',')
@@ -259,47 +250,103 @@ if __name__ == '__main__':
 
             results = at_detector.detect(gray, estimate_tag_pose=False)
             
-            if len(results) == 0:
-                ep_chassis.move(x = 0, y = 0, z = 45, z_speed = 30).wait_for_completed()
 
             for res in results:
-                if counter == 1:
-                    ep_chassis.drive_speed(x = 0, y = 0.25, z=0, timeout=5)
+                pose = find_pose_from_tag(K, res)
+                find_pose = pose[0]
+                # rot, jaco = cv2.Rodrigues(pose[1], pose[1])
+                pts = res.corners.reshape((-1, 1, 2)).astype(np.int32)
+                img = cv2.polylines(img, [pts], isClosed=True, color=(0, 0, 255), thickness=5)
+                cv2.circle(img, tuple(res.center.astype(np.int32)), 5, (0, 0, 255), -1)
+                if counter == 0 and res.tag_id == 32:
+                    counter = counter + 1
+                    ep_chassis.drive_speed(x = 0, y = 0.15, z=0, timeout=10)
                 if counter == 1 and res.tag_id == 38:
-                    if find_pose()[0] < -0.22:
+                    if find_pose[0] < -0.22:
                         # Go forward
                         counter = counter + 1
-                        ep_chassis.drive_speed(x = 0.25, y = 0, z=0, timeout=5)
+                        ep_chassis.drive_speed(x = 0.15, y = 0, z=0, timeout=10)
                 if counter == 2 and res.tag_id == 38:
-                    if find_pose()[2] < 0.5:
-                        # Turn 90 degrees CCW, go forward
+                    if find_pose[2] < 0.5:
+                        # Go Left
                         counter = counter + 1
-                        ep_chassis.move(x = 0, y = 0, z = 45, z_speed = 30).wait_for_completed()
-                        ep_chassis.drive_speed(x = 0.25, y = 0, z=0, timeout=5)
-                if counter == 3 and res.tag_id == 35:
-                    if find_pose()[2] < 0.62:
-                        # Turn 90 degrees CW, Go forward
+                        ep_chassis.drive_speed(x = 0, y = -0.15, z=0, timeout=10)
+                if counter == 3 and res.tag_id == 44:
+                    if find_pose[0] > 0.22:
+                        # Go forward
                         counter = counter + 1
-                        ep_chassis.move(x = 0, y = 0, z = -45, z_speed = 30).wait_for_completed()
-                        ep_chassis.drive_speed(x = 0.25, y = 0, z=0, timeout=5)
+                        ep_chassis.drive_speed(x = 0.15, y = 0, z=0, timeout=10)
                 if counter == 4 and res.tag_id == 44:
-                    if find_pose()[2] < 0.5:
-                        # Turn 180 degrees, Go left
+                    if find_pose[2] < 0.5:
                         counter = counter + 1
-                        ep_chassis.move(x = 0, y = 0, z = -45, z_speed = 30).wait_for_completed()
-                        ep_chassis.drive_speed(x = 0, y = -0.25, z=0, timeout=5)
-                if counter == 5 and res.tag_id == 39:
-                    if find_pose()[0] > 0.22:
-                        counter = counter + 1
-                if counter == 6 and res.tag_id == 39:
-                    if find_pose()[2] > 1.4:
-                        counter = counter + 1
-                        ep_chassis.drive_speed(x = 0, y = 0.25, z=0, timeout=5)
-                if counter == 7 and res.tag_id == 45:
-                    if find_pose()[0] < 0.05:
-                        ep_chassis.drive_speed(x = 0, y = 0, z=0, timeout=5)
-                        exit(1)
+                        ep_chassis.drive_speed(x = 0, y = 0.15, z=0, timeout=10)
+                if res.tag_id == 46 and counter == 5:
+                    # Finding correct heading
+                    pose[0][1]= 0
+                    Tag_loc = pose[0]
+                    if tag_orientation[current_tag] == 'right':
+                        Dtag_loc = [0, 0, 1]
+                    elif tag_orientation[current_tag] == 'left':
+                        Dtag_loc = [0, 0, 1]
+                    elif tag_orientation[current_tag] == 'down':
+                        Dtag_loc = [0, 0, 1]
+                    elif tag_orientation[current_tag] == 'up':
+                        Dtag_loc = [0, 0, 1]
+                    
 
+                    cross_product_AB = np.cross(Tag_loc, Dtag_loc)
+                    mag_cross = np.linalg.norm(cross_product_AB)
+                
+                    dot_AB = np.dot(Tag_loc,Dtag_loc)
+
+
+                    if pose[0][0] < 0:
+                        theta = -(np.arctan2(mag_cross, dot_AB))*180/np.pi
+                    else:
+                        theta = (np.arctan2(mag_cross, dot_AB))*180/np.pi
+                    kt = 1
+
+                    ep_chassis.drive_speed(x = .15, y = 0, z=kt*theta, timeout=10)
+                
+
+                # Once it hits middle of target 46, add one to counter and continue to the right
+                # Distance check to see at what point to make robot continue forward
+                # use heading control again for tag 45 in same way
+                # stop once y hits zero
+                
+                # if counter == 6 and res.tag_id == 39:
+                #     if find_pose[2] > 1.4:
+                #         counter = counter + 1
+                #         ep_chassis.drive_speed(x = 0, y = 0.15, z=0, timeout=10)
+                # if counter == 7 and res.tag_id == 45:
+                #     if find_pose[0] < 0.05:
+                #         ep_chassis.drive_speed(x = 0, y = 0, z=0, timeout=10)
+                #         exit(1)
+
+                # Finding correct heading
+                # pose[0][1]= 0
+                # Tag_loc = pose[0]
+                # if tag_orientation[current_tag] == 'right':
+                #     Dtag_loc = [0, 0, 1]
+                # elif tag_orientation[current_tag] == 'left':
+                #     Dtag_loc = [0, 0, 1]
+                # elif tag_orientation[current_tag] == 'down':
+                #     Dtag_loc = [0, 0, 1]
+                # elif tag_orientation[current_tag] == 'up':
+                #     Dtag_loc = [0, 0, 1]
+                
+
+                # cross_product_AB = np.cross(Tag_loc, Dtag_loc)
+                # mag_cross = np.linalg.norm(cross_product_AB)
+            
+                # dot_AB = np.dot(Tag_loc,Dtag_loc)
+
+
+                # if pose[0][0] < 0:
+                #     theta = -(np.arctan2(mag_cross, dot_AB))*180/np.pi
+                # else:
+                #     theta = (np.arctan2(mag_cross, dot_AB))*180/np.pi
+                # kt = 1
             cv2.imshow("img", img)
             cv2.waitKey(10)
 
