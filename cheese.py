@@ -8,7 +8,7 @@ from robomaster import robot
 from robomaster import camera
 from math import(sin, cos, asin, pi, atan2, atan, acos)
 
-time_step = 5
+time_step = 3
 k_time = 15/time_step
 t_run = 0.1
 last_step = 0
