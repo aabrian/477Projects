@@ -112,7 +112,8 @@ if __name__ == '__main__':
                 RT_matrix = np.array([ [cos(theta*pi/180), -sin(theta*pi/180), 0],[sin(theta*pi/180), cos(theta*pi/180),0],[0,0,1]] )
                 robot_vel = np.matmul(RT_matrix,v_w)
                 print('robot frame vel = ',robot_vel)
-                ep_chassis.drive_speed(x = robot_vel[1], y = robot_vel[0], z=0, timeout=.5)
+    
+                ep_chassis.drive_speed(x = robot_vel[0], y = robot_vel[1], z=0, timeout=.5)
                 # ep_chassis.drive_speed(x = -v_b[1], y = v_b[0], z=0, timeout=.5)
 
 
