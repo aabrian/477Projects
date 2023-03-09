@@ -205,18 +205,25 @@ if __name__ == '__main__':
                         costs[numrows-(c_check[1]+1)][c_check[0]] = n+1 # add n at this coordinate to cost matrix
                         visited.append(c_check) # add this coordinate to visited matrix
         n = n + 1
-    x = start_x
-    y = start_y
+    # x = start_x
+    # y = start_y
+    # t = 0
+    # L = 0.265
+    # path = [(L*(start_x-11),L*(start_y-7),t)]
+    # k = costs[numrows-(start_y+1)][start_x]
+    # for i in range(k-1):
+    #     new_x,new_y = check_surr_cost(k-i,x,y)
+    #     t = t+time_step
+    #     path.append((L*(new_x-11),L*(new_y-7),t))
+    #     x = new_x
+    #     y = new_y
+    
     t = 0
-    L = 0.265
-    path = [(L*(start_x-11),L*(start_y-7),t)]
-    k = costs[numrows-(start_y+1)][start_x]
-    for i in range(k-1):
-        new_x,new_y = check_surr_cost(k-i,x,y)
+    L = .265
+    path = [(start_x,start_y),(1,6),(2,4),(3,3),(4,4),(5,5),(5,6),(5,7),(6,8),(7,7),(8,6),(8,5),(9,4),(10,5),(11,6),(goal_x,goal_y)]
+    for i in range(len(path)):
+        path[i] = (L*(path[i][0]-11),L*(path[i][1]-7),t)
         t = t+time_step
-        path.append((L*(new_x-11),L*(new_y-7),t))
-        x = new_x
-        y = new_y
 
     # Finding current position
     ep_robot = robot.Robot()
@@ -247,11 +254,9 @@ if __name__ == '__main__':
                 ep_chassis.drive_speed(x = 0, y = 0, z=10, timeout=5)
 
             for res in results:
-                if t_run > last_step + time_step:
+                if t_run > last_step + time_step and res.tag_id != 40:
                     new_tag = (res.tag_id)
                     last_step = t_run
-                elif t_run == 0:
-                    new_tag = (res.tag_id)
                 else:
                     new_tag = current_tag
                 
