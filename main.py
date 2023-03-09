@@ -10,7 +10,7 @@ from math import(sin, cos, asin, pi, atan2, atan, acos)
 
 time_step = 3
 k_time = 15/time_step
-t_run = 0
+t_run = 0.1
 last_step = 0
 final_range = 0.05
 interval = 10
@@ -317,7 +317,7 @@ if __name__ == '__main__':
 
                 # Movement
                 ep_chassis.drive_speed(x = v_b[1], y = v_b[0], z=kt*theta, timeout=.5)
-
+                time.sleep(0.5)
                 t_run = t_run + time_step/interval
 
 

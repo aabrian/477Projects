@@ -8,9 +8,9 @@ from robomaster import robot
 from robomaster import camera
 from math import(sin, cos, asin, pi, atan2, atan, acos)
 
-time_step = 3
+time_step = 2
 k_time = 15/time_step
-t_run = 0
+t_run = 0.1
 last_step = 0
 final_range = 0.05
 interval = 10
@@ -158,7 +158,7 @@ def rotation_wa(direction):
 
 if __name__ == '__main__':
     # Creating interpolation and desired path
-    file = csv.reader(open(rb'C:\Users\jsche\OneDrive - University of Maryland\Spring 2023\CMSC477\Project1\map.csv'), delimiter=',')
+    file = csv.reader(open(rb'map.csv'), delimiter=',')
     x = list(file)
     maze = np.array(x).astype("int")
 
@@ -205,17 +205,25 @@ if __name__ == '__main__':
                         costs[numrows-(c_check[1]+1)][c_check[0]] = n+1 # add n at this coordinate to cost matrix
                         visited.append(c_check) # add this coordinate to visited matrix
         n = n + 1
-    x = start_x
-    y = start_y
+    # x = start_x
+    # y = start_y
+    # t = 0
+    # L = 0.265
+    # path = [(L*(start_x-11),L*(start_y-7),t)]
+    # k = costs[numrows-(start_y+1)][start_x]
+    # for i in range(k-1):
+    #     new_x,new_y = check_surr_cost(k-i,x,y)
+    #     t = t+time_step
+    #     path.append((L*(new_x-11),L*(new_y-7),t))
+    #     x = new_x
+    #     y = new_y
+    
     t = 0
-    path = [(start_x,start_y,t)]
-    k = costs[numrows-(start_y+1)][start_x]
-    for i in range(k-1):
-        new_x,new_y = check_surr_cost(k-i,x,y)
+    L = .265
+    path = [(start_x,start_y),(1,6),(1,5),(1,4),(2,4),(3,4),(4,4),(5,4),(5,5),(5,6),(5,7),(5,8),(6,8),(7,8),(7,7),(8,7),(8,6),(8,5),(8,4),(9,4),(10,4),(10,5),(10,6),(11,6),(goal_x,goal_y)]
+    for i in range(len(path)):
+        path[i] = (L*(path[i][0]-11),L*(path[i][1]-7),t)
         t = t+time_step
-        path.append((.265*new_x,.265*new_y,t))
-        x = new_x
-        y = new_y
 
     # Finding current position
     ep_robot = robot.Robot()
@@ -224,13 +232,13 @@ if __name__ == '__main__':
     ep_camera.start_video_stream(display=False, resolution=camera.STREAM_360P)
     ep_chassis = ep_robot.chassis
 
-    tag_size=0.2 # tag size in meters
+    tag_size = 0.2 # tag size in meters
     l = .265
     
     tag_coords = {32 : [-8.5*l,0],34:[-8*l,-1.5*l],33:[-7.5*l,0],31:[-7.5*l,2*l],35:[-6*l,2.5*l],
-    36:[-4*l,2.5*l],42:[-2.5*l,2*l],44:[-2.5*l,0],46:[-2*l,-1.5*l],45:[-1.5*l,0],39:[-4.5*l,-2*l],41:[-4.5*l,-4*l],43:[-1.5*l,2*l],37:[-5*l,-0.5*l],30:[-8.5*l,2*l],40:[-5.5*l,-2*l],}
+    36:[-4*l,2.5*l],42:[-2.5*l,2*l],44:[-2.5*l,0],46:[-2*l,-1.5*l],45:[-1.5*l,0],39:[-4.5*l,-2*l],41:[-4.5*l,-4*l],43:[-1.5*l,2*l],37:[-5*l,-0.5*l],30:[-8.5*l,2*l],38:[-5.5*l,-2*l],40:[-5.5*l,-4*l]}
     tag_orientation  = {30:'left',32:'left',34:'down',33:'right',31:'right',35:'down',36:'down',42:'left',
-                        44:'left',46:'down',45:'right',43:'right',37:'up',38:'left',40:'left',39:'right',41:'right'}
+                        44:'left',46:'down',45:'right',43:'right',37:'up',38:'left',40:'left',39:'right',41:'right',13:'right'}
     while True:
         try:
             img = ep_camera.read_cv2_image(strategy="newest", timeout=2)   
@@ -241,32 +249,34 @@ if __name__ == '__main__':
             K=np.array([[184.752*kk, 0, 320], [0, 184.752*kk, 180], [0, 0, 1]])
 
             results = at_detector.detect(gray, estimate_tag_pose=False)
+            
             if len(results) == 0:
-                ep_chassis.drive_speed(x = 0, y = 0, z=10, timeout=5)
+                ep_chassis.move(x = 0, y = 0, z = 45, z_speed = 30).wait_for_completed()
 
+            poses = []
             for res in results:
-                if t_run > last_step + k_time*time_step:
-                    new_tag = (res.tag_id)
-                    last_step = t_run
-                elif t_run == 0:
-                    new_tag = (res.tag_id)
-                else:
-                    new_tag = current_tag
+                # if t_run > last_step + time_step and res.tag_id != 40:
+                #     new_tag = (res.tag_id)
+                #     last_step = t_run
+                # if res.tag_id != 40:
+                #     new_tag = (res.tag_id)
+                # else:
+                #     new_tag = current_tag
                 
-                current_tag = new_tag
-
+                current_tag = res.tag_id
+                print(current_tag)
                 ## Checking if tag id match tags of interest and turning at these
 
                 if current_tag == 34 and counter1 == 0: # rotate 90 degrees 90 degrees if tag 34 seen
-                    time.sleep(0.5) # want the last velocity command to continue moving so gives robot space
-                    time_run = time_run - 0.5 # don't want to mess up timing
-                    ep_chassis.move(x = 0, y = 0, z = 90, z_speed = 30).wait_for_completed()
+                    time.sleep(1) # want the last velocity command to continue moving so gives robot space
+                    t_run = t_run - 0.5 # don't want to mess up timing
+                    ep_chassis.move(x = 0, y = 0, z = 45, z_speed = 30).wait_for_completed()
                     counter1 = 1
 
                 if current_tag == 45 and counter2 == 0: # rotate 90 degrees 90 degrees if tag 45 seen
-                    time.sleep(0.5) # want the last velocity command to continue moving so gives robot space
-                    time_run = time_run - 0.5 # don't want to mess up timing
-                    ep_chassis.move(x = 0, y = 0, z = 90, z_speed = 30).wait_for_completed()
+                    time.sleep(1) # want the last velocity command to continue moving so gives robot space
+                    t_run = t_run - 0.5 # don't want to mess up timing
+                    ep_chassis.move(x = 0, y = 0, z = 45, z_speed = 30).wait_for_completed()
                     counter2 = 0
 
                 
@@ -279,38 +289,12 @@ if __name__ == '__main__':
 
                 # Current position [x,y]
                 world_pose = find_robot_pos(tag_coords[current_tag],tag_orientation[current_tag],pose[0])
-                
-
-                # Feedback Loop to get desired world velocity
-                K = 1
-                x_pos_des = interp(t_run)[0]
-                y_pos_des = interp(t_run)[1]
-                curr_x = world_pose[0]
-                curr_y = world_pose[1]
+                poses.append(world_pose)
                 
                 if current_tag == 45:
                     if curr_y < .05 or curr_y > -.05: # if y coordinate of robot camera even with goal, exit program
                         ep_chassis.drive_speed(x = v_b[1], y = v_b[0], z=0, timeout=1)
-                        exit
-
-                # Feedfoward
-                x_vel_des = derivative(t)[0]
-                y_vel_des = derivative(t)[1]
-
-                # Control Law
-                output_x = K*(x_pos_des - curr_x) + x_vel_des
-                output_y = K*(y_pos_des - curr_y) + y_vel_des
-                v_w = np.array([output_x,output_y,0])
-
-
-                # Converting to v_b
-                rot_wa = rotation_wa(tag_orientation[current_tag])
-                rot_ac = np.transpose(rot_ca)
-                rot_wc = np.matmul(rot_wa, rot_ac)
-                rot_bc = np.array([[0, 0, 1], [1, 0, 0], [0, -1, 0]])
-                w2b = np.matmul(rot_bc,np.transpose(rot_wc))
-                kb = 0.5
-                v_b = kb*np.matmul(w2b,v_w)
+                        exit(1)
 
                 ############### NOT USING ##################
                 # # Finding correct heading
@@ -338,11 +322,42 @@ if __name__ == '__main__':
                 #     theta = (np.arctan2(mag_cross, dot_AB))*180/np.pi
                 # kt = 1
                 #############################################
-                # Movement
-                ep_chassis.drive_speed(x = v_b[1], y = v_b[0], z=0, timeout=1)
+            
+            # Feedback Loop to get desired world velocity
+            Kc = .1
+            x_pos_des = interp(t_run)[0]
+            y_pos_des = interp(t_run)[1]
+            sum_x = 0
+            sum_y = 0
+            for i in range(len(poses)):
+                sum_x = sum_x + poses[i][0]
+                sum_y = sum_y + poses[i][1]
+            curr_x = sum_x/len(poses)
+            curr_y = sum_y/len(poses)
+            print(curr_x,curr_y)
 
-                t_run = t_run + time_step/interval
+            # Feedfoward
+            x_vel_des = derivative(t_run)[0]
+            y_vel_des = derivative(t_run)[1]
 
+            # Control Law
+            output_x = Kc*(x_pos_des - curr_x) + x_vel_des
+            output_y = Kc*(y_pos_des - curr_y) + y_vel_des
+            v_w = np.array([output_x,output_y,0])
+
+            # Converting to v_b
+            rot_wa = rotation_wa(tag_orientation[current_tag])
+            rot_ac = np.transpose(rot_ca)
+            rot_wc = np.matmul(rot_wa, rot_ac)
+            rot_bc = np.array([[0, 0, 1], [1, 0, 0], [0, -1, 0]])
+            w2b = np.matmul(rot_bc,np.transpose(rot_wc))
+            kb = 1
+            v_b = kb*np.matmul(w2b,v_w)
+
+            ep_chassis.drive_speed(x = v_b[1], y = v_b[0], z=0, timeout=1)
+            time.sleep(0.25)
+
+            t_run = t_run + time_step/interval
 
             cv2.imshow("img", img)
             cv2.waitKey(10)
