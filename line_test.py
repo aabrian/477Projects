@@ -106,7 +106,15 @@ if __name__ == '__main__':
                     theta = (np.arctan2(mag_cross, dot_AB))*180/np.pi
                     #print("theta: ", theta)
                 kt = 1
+<<<<<<< HEAD
+<<<<<<< HEAD
+                print("x ", v_b[1], " y ",v_b[0], "z ", theta )
+=======
+>>>>>>> 79708ed268728d858d7f17f30d9846ad465b2817
+                ep_chassis.drive_speed(x = v_b[1], y = v_b[0], z=kt*theta, timeout=.5)
+=======
                 ep_chassis.drive_speed(x = v_b[1], y = v_b[0], z=0, timeout=.5)
+>>>>>>> b60a2ae314e2d1b3787d52fc6b8f9cfa5e013609
 
             cv2.imshow("img", img)
             cv2.waitKey(10)
