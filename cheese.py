@@ -8,7 +8,7 @@ from robomaster import robot
 from robomaster import camera
 from math import(sin, cos, asin, pi, atan2, atan, acos)
 
-time_step = 5
+time_step = 2
 k_time = 15/time_step
 t_run = 0.1
 last_step = 0
@@ -220,7 +220,7 @@ if __name__ == '__main__':
     
     t = 0
     L = .265
-    path = [(start_x,start_y),(1,6),(2,4),(3,3),(4,4),(5,5),(5,6),(5,7),(6,8),(7,7),(8,6),(8,5),(9,4),(10,5),(11,6),(goal_x,goal_y)]
+    path = [(start_x,start_y),(1,6),(1,5),(1,4),(2,4),(3,4),(4,4),(5,4),(5,5),(5,6),(5,7),(5,8),(6,8),(7,8),(7,7),(8,7),(8,6),(8,5),(8,4),(9,4),(10,4),(10,5),(10,6),(11,6),(goal_x,goal_y)]
     for i in range(len(path)):
         path[i] = (L*(path[i][0]-11),L*(path[i][1]-7),t)
         t = t+time_step
@@ -251,8 +251,9 @@ if __name__ == '__main__':
             results = at_detector.detect(gray, estimate_tag_pose=False)
             
             if len(results) == 0:
-                ep_chassis.drive_speed(x = 0, y = 0, z=10, timeout=5)
+                ep_chassis.move(x = 0, y = 0, z = 45, z_speed = 30).wait_for_completed()
 
+            poses = []
             for res in results:
                 if t_run > last_step + time_step and res.tag_id != 40:
                     new_tag = (res.tag_id)
@@ -286,40 +287,12 @@ if __name__ == '__main__':
 
                 # Current position [x,y]
                 world_pose = find_robot_pos(tag_coords[current_tag],tag_orientation[current_tag],pose[0])
-                
-
-                # Feedback Loop to get desired world velocity
-                Kc = .1
-                x_pos_des = interp(t_run)[0]
-                y_pos_des = interp(t_run)[1]
-                curr_x = world_pose[0]
-                curr_y = world_pose[1]
+                poses.append(world_pose)
                 
                 if current_tag == 45:
                     if curr_y < .05 or curr_y > -.05: # if y coordinate of robot camera even with goal, exit program
                         ep_chassis.drive_speed(x = v_b[1], y = v_b[0], z=0, timeout=1)
-                        exit
-
-                # Feedfoward
-                x_vel_des = derivative(t_run)[0]
-                y_vel_des = derivative(t_run)[1]
-
-                # Control Law
-                output_x = Kc*(x_pos_des - curr_x) + x_vel_des
-                output_y = Kc*(y_pos_des - curr_y) + y_vel_des
-                v_w = np.array([output_x,output_y,0])
-                print(x_pos_des - curr_x,y_pos_des - curr_y)
-                print(v_w)
-
-                # Converting to v_b
-                rot_wa = rotation_wa(tag_orientation[current_tag])
-                rot_ac = np.transpose(rot_ca)
-                rot_wc = np.matmul(rot_wa, rot_ac)
-                rot_bc = np.array([[0, 0, 1], [1, 0, 0], [0, -1, 0]])
-                w2b = np.matmul(rot_bc,np.transpose(rot_wc))
-                kb = 1
-                v_b = kb*np.matmul(w2b,v_w)
-                print(v_b)
+                        exit(1)
 
                 ############### NOT USING ##################
                 # # Finding correct heading
@@ -347,12 +320,42 @@ if __name__ == '__main__':
                 #     theta = (np.arctan2(mag_cross, dot_AB))*180/np.pi
                 # kt = 1
                 #############################################
-                # Movement
-                ep_chassis.drive_speed(x = v_b[1], y = v_b[0], z=0, timeout=1)
-                time.sleep(0.25)
+            
+            # Feedback Loop to get desired world velocity
+            Kc = .1
+            x_pos_des = interp(t_run)[0]
+            y_pos_des = interp(t_run)[1]
+            sum_x = 0
+            sum_y = 0
+            for i in range(len(poses)):
+                sum_x = sum_x + poses[i][0]
+                sum_y = sum_y + poses[i][1]
+            curr_x = sum_x/len(poses)
+            curr_y = sum_y/len(poses)
+            print(curr_x,curr_y)
 
-                t_run = t_run + time_step/interval
+            # Feedfoward
+            x_vel_des = derivative(t_run)[0]
+            y_vel_des = derivative(t_run)[1]
 
+            # Control Law
+            output_x = Kc*(x_pos_des - curr_x) + x_vel_des
+            output_y = Kc*(y_pos_des - curr_y) + y_vel_des
+            v_w = np.array([output_x,output_y,0])
+
+            # Converting to v_b
+            rot_wa = rotation_wa(tag_orientation[current_tag])
+            rot_ac = np.transpose(rot_ca)
+            rot_wc = np.matmul(rot_wa, rot_ac)
+            rot_bc = np.array([[0, 0, 1], [1, 0, 0], [0, -1, 0]])
+            w2b = np.matmul(rot_bc,np.transpose(rot_wc))
+            kb = 1
+            v_b = kb*np.matmul(w2b,v_w)
+
+            ep_chassis.drive_speed(x = v_b[1], y = v_b[0], z=0, timeout=1)
+            time.sleep(0.25)
+
+            t_run = t_run + time_step/interval
 
             cv2.imshow("img", img)
             cv2.waitKey(10)
