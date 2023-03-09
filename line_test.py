@@ -83,7 +83,7 @@ if __name__ == '__main__':
                 w2b = np.matmul(rot_bc,np.transpose(rot_wc))
                 # R_bw = rot_cb.T @ 
                 v_w = np.array([1,0,0])
-                kb = 0.25
+                kb = 0.15
                 v_b = kb*np.matmul(w2b,v_w)
                 cv2.circle(img, tuple(res.center.astype(np.int32)), 5, (0, 0, 255), -1)
                 pose[0][1]= 0
@@ -106,7 +106,7 @@ if __name__ == '__main__':
                     theta = (np.arctan2(mag_cross, dot_AB))*180/np.pi
                     #print("theta: ", theta)
                 kt = 1
-                ep_chassis.drive_speed(x = v_b[1], y = v_b[0], z=kt*theta, timeout=.5)
+                ep_chassis.drive_speed(x = v_b[1], y = v_b[0], z=0, timeout=.5)
 
             cv2.imshow("img", img)
             cv2.waitKey(10)

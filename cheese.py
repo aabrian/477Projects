@@ -8,7 +8,7 @@ from robomaster import robot
 from robomaster import camera
 from math import(sin, cos, asin, pi, atan2, atan, acos)
 
-time_step = 3
+time_step = 5
 k_time = 15/time_step
 t_run = 0.1
 last_step = 0
@@ -81,7 +81,6 @@ def interp(t):
             x_above = path[i][0]
             y_above = path[i][1]
             t_above = path[i][2]
-    print(x_below,x_above)
 
     x_interp = x_below + (t - t_below)*(x_above - x_below)/(t_above - t_below)
     y_interp = y_below + (t - t_below)*(y_above - y_below)/(t_above - t_below)
@@ -209,12 +208,13 @@ if __name__ == '__main__':
     x = start_x
     y = start_y
     t = 0
-    path = [(start_x,start_y,t)]
+    L = 0.265
+    path = [(L*(start_x-11),L*(start_y-7),t)]
     k = costs[numrows-(start_y+1)][start_x]
     for i in range(k-1):
         new_x,new_y = check_surr_cost(k-i,x,y)
         t = t+time_step
-        path.append((.265*new_x,.265*new_y,t))
+        path.append((L*(new_x-11),L*(new_y-7),t))
         x = new_x
         y = new_y
 
@@ -225,7 +225,7 @@ if __name__ == '__main__':
     ep_camera.start_video_stream(display=False, resolution=camera.STREAM_360P)
     ep_chassis = ep_robot.chassis
 
-    tag_size=0.2 # tag size in meters
+    tag_size = 0.2 # tag size in meters
     l = .265
     
     tag_coords = {32 : [-8.5*l,0],34:[-8*l,-1.5*l],33:[-7.5*l,0],31:[-7.5*l,2*l],35:[-6*l,2.5*l],
@@ -242,6 +242,7 @@ if __name__ == '__main__':
             K=np.array([[184.752*kk, 0, 320], [0, 184.752*kk, 180], [0, 0, 1]])
 
             results = at_detector.detect(gray, estimate_tag_pose=False)
+            
             if len(results) == 0:
                 ep_chassis.drive_speed(x = 0, y = 0, z=10, timeout=5)
 
@@ -283,8 +284,7 @@ if __name__ == '__main__':
                 
 
                 # Feedback Loop to get desired world velocity
-                K = 1
-                print('time = '+str(t_run))
+                Kc = 1
                 x_pos_des = interp(t_run)[0]
                 y_pos_des = interp(t_run)[1]
                 curr_x = world_pose[0]
@@ -300,10 +300,9 @@ if __name__ == '__main__':
                 y_vel_des = derivative(t_run)[1]
 
                 # Control Law
-                output_x = K*(x_pos_des - curr_x) + x_vel_des
-                output_y = K*(y_pos_des - curr_y) + y_vel_des
+                output_x = Kc*(x_pos_des - curr_x) + x_vel_des
+                output_y = Kc*(y_pos_des - curr_y) + y_vel_des
                 v_w = np.array([output_x,output_y,0])
-                print(v_w)
 
 
                 # Converting to v_b
@@ -312,8 +311,9 @@ if __name__ == '__main__':
                 rot_wc = np.matmul(rot_wa, rot_ac)
                 rot_bc = np.array([[0, 0, 1], [1, 0, 0], [0, -1, 0]])
                 w2b = np.matmul(rot_bc,np.transpose(rot_wc))
-                kb = 0.05
+                kb = 0.1
                 v_b = kb*np.matmul(w2b,v_w)
+                print(v_b)
 
                 ############### NOT USING ##################
                 # # Finding correct heading

@@ -116,6 +116,7 @@ if __name__ == '__main__':
                 # print(world_pose)
 
                 t_run = t_run + time_step/interval
+                time.sleep(0.5)
 
 
 

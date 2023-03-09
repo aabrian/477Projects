@@ -129,12 +129,13 @@ if __name__ == '__main__':
     x = start_x
     y = start_y
     t = 0
-    path = [(start_x,start_y,t)]
+    L = 0.265
+    path = [(L*(start_x-11),L*(start_y-7),t)]
     k = costs[numrows-(start_y+1)][start_x]
     for i in range(k-1):
         new_x,new_y = check_surr_cost(k-i,x,y)
         t = t+time_step
-        path.append((.265*new_x,.265*new_y,t))
+        path.append((L*(new_x-11),L*(new_y-7),t))
         x = new_x
         y = new_y
     print(path)
