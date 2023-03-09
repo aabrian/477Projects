@@ -158,7 +158,7 @@ def rotation_wa(direction):
 
 if __name__ == '__main__':
     # Creating interpolation and desired path
-    file = csv.reader(open(rb'C:\Users\jsche\OneDrive - University of Maryland\Spring 2023\CMSC477\Project1\map.csv'), delimiter=',')
+    file = csv.reader(open(rb'map.csv'), delimiter=',')
     x = list(file)
     maze = np.array(x).astype("int")
 
