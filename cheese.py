@@ -255,13 +255,15 @@ if __name__ == '__main__':
 
             poses = []
             for res in results:
-                if t_run > last_step + time_step and res.tag_id != 40:
-                    new_tag = (res.tag_id)
-                    last_step = t_run
-                else:
-                    new_tag = current_tag
+                # if t_run > last_step + time_step and res.tag_id != 40:
+                #     new_tag = (res.tag_id)
+                #     last_step = t_run
+                # if res.tag_id != 40:
+                #     new_tag = (res.tag_id)
+                # else:
+                #     new_tag = current_tag
                 
-                current_tag = new_tag
+                current_tag = res.tag_id
                 print(current_tag)
                 ## Checking if tag id match tags of interest and turning at these
 
