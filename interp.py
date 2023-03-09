@@ -138,4 +138,4 @@ if __name__ == '__main__':
         x = new_x
         y = new_y
     print(path)
-    print(interp(2.1))
+    print(interp(.1))

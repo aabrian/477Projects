@@ -73,7 +73,7 @@ if __name__ == '__main__':
     tag_size=0.2 # tag size in meters
     l = .265
     tag_coords = {32 : [-8.5*l,0],34:[-8*l,-1.5*l],33:[-7.5*l,0],31:[-7.5*l,2*l],35:[-6*l,2.5*l],
-36:[-4*l,2.5*l],42:[-2.5*l,2*l],44:[-2.5*l,0],46:[-2*l,-1.5*l],45:[-1.5*l,0],39:[-4.5*l,-2*l],41:[-4.5*l,-4*l],43:[-1.5*l,2*l],37:[-5*l,-0.5*l],30:[-8.5*l,2*l],40:[-5.5*l,-2*l],}
+    36:[-4*l,2.5*l],42:[-2.5*l,2*l],44:[-2.5*l,0],46:[-2*l,-1.5*l],45:[-1.5*l,0],39:[-4.5*l,-2*l],41:[-4.5*l,-4*l],43:[-1.5*l,2*l],37:[-5*l,-0.5*l],30:[-8.5*l,2*l],38:[-5.5*l,-2*l],40:[-5.5*l,-4*l]}
     tag_orientation  = {30:'left',32:'left',34:'down',33:'right',31:'right',35:'down',36:'down',42:'left',
                         44:'left',46:'down',45:'right',43:'right',37:'up',38:'left',40:'left',39:'right',41:'right'}
     while True:
@@ -100,7 +100,10 @@ if __name__ == '__main__':
                 
                 current_tag = new_tag
                 print(current_tag)
-
+                if current_tag == 34 or current_tag == 45:
+                    time.sleep(0.5)
+                    t_run = t_run - 0.5
+                    print('Critical Tag Found, Tunring 90 degrees')
                 pose = find_pose_from_tag(K, res)
                 rot, jaco = cv2.Rodrigues(pose[1], pose[1])
                 # print(rot)

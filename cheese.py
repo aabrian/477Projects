@@ -10,7 +10,7 @@ from math import(sin, cos, asin, pi, atan2, atan, acos)
 
 time_step = 3
 k_time = 15/time_step
-t_run = 0
+t_run = 0.1
 last_step = 0
 final_range = 0.05
 interval = 10
@@ -81,6 +81,7 @@ def interp(t):
             x_above = path[i][0]
             y_above = path[i][1]
             t_above = path[i][2]
+    print(x_below,x_above)
 
     x_interp = x_below + (t - t_below)*(x_above - x_below)/(t_above - t_below)
     y_interp = y_below + (t - t_below)*(y_above - y_below)/(t_above - t_below)
@@ -228,9 +229,9 @@ if __name__ == '__main__':
     l = .265
     
     tag_coords = {32 : [-8.5*l,0],34:[-8*l,-1.5*l],33:[-7.5*l,0],31:[-7.5*l,2*l],35:[-6*l,2.5*l],
-    36:[-4*l,2.5*l],42:[-2.5*l,2*l],44:[-2.5*l,0],46:[-2*l,-1.5*l],45:[-1.5*l,0],39:[-4.5*l,-2*l],41:[-4.5*l,-4*l],43:[-1.5*l,2*l],37:[-5*l,-0.5*l],30:[-8.5*l,2*l],40:[-5.5*l,-2*l],}
+    36:[-4*l,2.5*l],42:[-2.5*l,2*l],44:[-2.5*l,0],46:[-2*l,-1.5*l],45:[-1.5*l,0],39:[-4.5*l,-2*l],41:[-4.5*l,-4*l],43:[-1.5*l,2*l],37:[-5*l,-0.5*l],30:[-8.5*l,2*l],40:[-5.5*l,-2*l],13:[-1.5*l,l]}
     tag_orientation  = {30:'left',32:'left',34:'down',33:'right',31:'right',35:'down',36:'down',42:'left',
-                        44:'left',46:'down',45:'right',43:'right',37:'up',38:'left',40:'left',39:'right',41:'right'}
+                        44:'left',46:'down',45:'right',43:'right',37:'up',38:'left',40:'left',39:'right',41:'right',13:'right'}
     while True:
         try:
             img = ep_camera.read_cv2_image(strategy="newest", timeout=2)   
@@ -258,14 +259,14 @@ if __name__ == '__main__':
                 ## Checking if tag id match tags of interest and turning at these
 
                 if current_tag == 34 and counter1 == 0: # rotate 90 degrees 90 degrees if tag 34 seen
-                    time.sleep(0.5) # want the last velocity command to continue moving so gives robot space
-                    time_run = time_run - 0.5 # don't want to mess up timing
+                    time.sleep(1) # want the last velocity command to continue moving so gives robot space
+                    t_run = t_run - 0.5 # don't want to mess up timing
                     ep_chassis.move(x = 0, y = 0, z = 90, z_speed = 30).wait_for_completed()
                     counter1 = 1
 
                 if current_tag == 45 and counter2 == 0: # rotate 90 degrees 90 degrees if tag 45 seen
-                    time.sleep(0.5) # want the last velocity command to continue moving so gives robot space
-                    time_run = time_run - 0.5 # don't want to mess up timing
+                    time.sleep(1) # want the last velocity command to continue moving so gives robot space
+                    t_run = t_run - 0.5 # don't want to mess up timing
                     ep_chassis.move(x = 0, y = 0, z = 90, z_speed = 30).wait_for_completed()
                     counter2 = 0
 
@@ -283,6 +284,7 @@ if __name__ == '__main__':
 
                 # Feedback Loop to get desired world velocity
                 K = 1
+                print('time = '+str(t_run))
                 x_pos_des = interp(t_run)[0]
                 y_pos_des = interp(t_run)[1]
                 curr_x = world_pose[0]
@@ -294,13 +296,14 @@ if __name__ == '__main__':
                         exit
 
                 # Feedfoward
-                x_vel_des = derivative(t)[0]
-                y_vel_des = derivative(t)[1]
+                x_vel_des = derivative(t_run)[0]
+                y_vel_des = derivative(t_run)[1]
 
                 # Control Law
                 output_x = K*(x_pos_des - curr_x) + x_vel_des
                 output_y = K*(y_pos_des - curr_y) + y_vel_des
                 v_w = np.array([output_x,output_y,0])
+                print(v_w)
 
 
                 # Converting to v_b
@@ -309,7 +312,7 @@ if __name__ == '__main__':
                 rot_wc = np.matmul(rot_wa, rot_ac)
                 rot_bc = np.array([[0, 0, 1], [1, 0, 0], [0, -1, 0]])
                 w2b = np.matmul(rot_bc,np.transpose(rot_wc))
-                kb = 0.5
+                kb = 0.05
                 v_b = kb*np.matmul(w2b,v_w)
 
                 ############### NOT USING ##################
@@ -340,6 +343,7 @@ if __name__ == '__main__':
                 #############################################
                 # Movement
                 ep_chassis.drive_speed(x = v_b[1], y = v_b[0], z=0, timeout=1)
+                time.sleep(0.5)
 
                 t_run = t_run + time_step/interval
 
