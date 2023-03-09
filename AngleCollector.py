@@ -4,6 +4,7 @@ import numpy as np
 import time
 from robomaster import robot
 from robomaster import camera
+import csv
 from math import(sin, cos, asin, pi, atan2, atan, acos)
 
 at_detector = Detector(
@@ -52,7 +53,12 @@ if __name__ == '__main__':
     tag_size=0.2 # tag size in meters
 
     ep_chassis = ep_robot.chassis
-
+    recorded_angles = []
+    recorded_time = []
+    csvfile = open('data.csv','w')
+    writer = csv.writer(csvfile,delimiter=',',quotechar='|', quoting=csv.QUOTE_MINIMAL,lineterminator='\n')
+    header = ['time','xPos','yPos','theta']
+    writer.writerow(header)   
     while True:
         try:
             img = ep_camera.read_cv2_image(strategy="newest", timeout=1)   
@@ -112,14 +118,27 @@ if __name__ == '__main__':
                 RT_matrix = np.array([ [cos(theta*pi/180), -sin(theta*pi/180), 0],[sin(theta*pi/180), cos(theta*pi/180),0],[0,0,1]] )
                 robot_vel = np.matmul(RT_matrix,v_w)
                 print('robot frame vel = ',robot_vel)
-    
-                ep_chassis.drive_speed(x = robot_vel[0], y = robot_vel[1], z=0, timeout=.5)
+                ep_chassis.drive_speed(x = 0, y = 1, z=0, timeout=.25)
+
+                current_time = time.time()
+                recorded_time.append(current_time)
+                recorded_angles.append(theta)
+                row = [current_time,pose[0][0],pose[0][2],theta]
+                writer.writerow(row)
+
+
+
+
+
+
+
+
                 # ep_chassis.drive_speed(x = -v_b[1], y = v_b[0], z=0, timeout=.5)
 
 
             cv2.imshow("img", img)
             cv2.waitKey(10)
-           
+        
         except KeyboardInterrupt:
             ep_camera.stop_video_stream()
             ep_robot.close()
