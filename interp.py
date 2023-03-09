@@ -140,3 +140,11 @@ if __name__ == '__main__':
         y = new_y
     print(path)
     print(interp(.1))
+
+    t = 0
+    L = .265
+    path_new = [(start_x,start_y),(1,6),(2,4),(3,3),(4,4),(5,5),(5,6),(5,7),(6,8),(7,7),(8,6),(8,5),(9,4),(10,5),(11,6),(goal_x,goal_y)]
+    print(path_new[0][0])
+    for i in range(len(path_new)):
+        path_new[i] = (L*(path_new[i][0]-11),L*(path_new[i][1]-7),t)
+        t = t+time_step
