@@ -64,6 +64,12 @@ def move(c): # moves using inputed coordinate and direction
     plt.plot(x, y, marker="+", markersize=15, markerfacecolor="purple", markeredgecolor="purple")
     plt.pause(0.05)
 
+def move_actual(c): # moves using inputed coordinate and direction
+    y = c[1]
+    x = c[0]
+    plt.plot(x, y, marker="o", markersize=5, markerfacecolor="orange", markeredgecolor="orange")
+    plt.pause(0.05)
+
 if __name__ == '__main__':
  
     # opening and reading the CSV file
@@ -133,5 +139,8 @@ if __name__ == '__main__':
         move(new_c)
         coord = new_c
 
+    actual_path = [(start_x,start_y),(1,6),(1,5),(2,5),(3,5),(4,5),(5,5),(5,6),(5,7),(5,8),(6,8),(7,8),(8,8),(8,7),(8,6),(8,5),(8,4),(9,3),(10,4),(11,5),(11,6),(11,7)]
+    for i in range(len(actual_path)):
+        move_actual(actual_path[i])
     plt.show()
 
