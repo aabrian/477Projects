@@ -281,34 +281,45 @@ if __name__ == '__main__':
                         counter = counter + 1
                         ep_chassis.drive_speed(x = 0, y = 0.15, z=0, timeout=10)
                 if res.tag_id == 46 and counter == 5:
-                    # Finding correct heading
-                    pose[0][1]= 0
-                    Tag_loc = pose[0]
-                    if tag_orientation[current_tag] == 'right':
+                    if find_pose[0] < -0.3:
+                        # Finding correct heading
+                        pose[0][1]= 0
+                        Tag_loc = pose[0]
                         Dtag_loc = [0, 0, 1]
-                    elif tag_orientation[current_tag] == 'left':
+                        cross_product_AB = np.cross(Tag_loc, Dtag_loc)
+                        mag_cross = np.linalg.norm(cross_product_AB)
+                        dot_AB = np.dot(Tag_loc,Dtag_loc)
+                        if pose[0][0] < 0:
+                            theta = -(np.arctan2(mag_cross, dot_AB))*180/np.pi
+                        else:
+                            theta = (np.arctan2(mag_cross, dot_AB))*180/np.pi
+                        kt = .25
+                        ep_chassis.drive_speed(x = 0, y = 0.1, z=kt*theta, timeout=10)
+                    if find_pose[0] > 0:
+                        print('center found')
+                        counter = counter + 1
+                        ep_chassis.drive_speed(x = .1, y = 0.15, z=0, timeout=10)
+                if res.tag_id == 45 and counter == 6: 
+                    if find_pose[0] < -0.25:
+                        # Finding correct heading
+                        pose[0][1]= 0
+                        Tag_loc = pose[0]
                         Dtag_loc = [0, 0, 1]
-                    elif tag_orientation[current_tag] == 'down':
-                        Dtag_loc = [0, 0, 1]
-                    elif tag_orientation[current_tag] == 'up':
-                        Dtag_loc = [0, 0, 1]
-                    
-
-                    cross_product_AB = np.cross(Tag_loc, Dtag_loc)
-                    mag_cross = np.linalg.norm(cross_product_AB)
-                
-                    dot_AB = np.dot(Tag_loc,Dtag_loc)
-
-
-                    if pose[0][0] < 0:
-                        theta = -(np.arctan2(mag_cross, dot_AB))*180/np.pi
-                    else:
-                        theta = (np.arctan2(mag_cross, dot_AB))*180/np.pi
-                    kt = 1
-
-                    ep_chassis.drive_speed(x = .15, y = 0, z=kt*theta, timeout=10)
-                
-
+                        cross_product_AB = np.cross(Tag_loc, Dtag_loc)
+                        mag_cross = np.linalg.norm(cross_product_AB)
+                        dot_AB = np.dot(Tag_loc,Dtag_loc)
+                        if pose[0][0] < 0:
+                            theta = -(np.arctan2(mag_cross, dot_AB))*180/np.pi
+                        else:
+                            theta = (np.arctan2(mag_cross, dot_AB))*180/np.pi
+                        ep_chassis.drive_speed(x = 0, y = 0.1, z=kt*theta, timeout=10)
+                    if find_pose[0] > 0:
+                        counter = counter + 1
+                        ep_chassis.drive_speed(x = .15, y = 0, z=0, timeout=10)
+                if res.tag_id == 45 and counter == 7: 
+                    if find_pose[2] < 0.5:
+                        ep_chassis.drive_speed(x = 0, y = 0, z=0, timeout=10)
+                        counter = counter + 1
                 # Once it hits middle of target 46, add one to counter and continue to the right
                 # Distance check to see at what point to make robot continue forward
                 # use heading control again for tag 45 in same way
