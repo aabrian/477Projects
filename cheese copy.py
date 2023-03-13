@@ -157,7 +157,7 @@ def rotation_wa(direction):
 
 if __name__ == '__main__':
     # Creating interpolation and desired path
-    file = csv.reader(open(rb'C:\Users\jsche\OneDrive - University of Maryland\Spring 2023\CMSC477\Project1\Shared\477Project1\map.csv'), delimiter=',')
+    file = csv.reader(open(rb'/Users/david/RoboMaster-SDK/Project1/shared/477Project1/map.csv'), delimiter=',')
     x = list(file)
     maze = np.array(x).astype("int")
 
@@ -275,39 +275,19 @@ if __name__ == '__main__':
                     if find_pose[0] > 0.22:
                         # Go forward
                         counter = counter + 1
-                        ep_chassis.drive_speed(x = 0.15, y = 0, z=0, timeout=10)
+                        ep_chassis.drive_speed(x = 0.09, y = 0, z=0, timeout=10)
                 if counter == 4 and res.tag_id == 44:
-                    if find_pose[2] < 0.5:
+                    # go left
+                    print(find_pose[2])
+                    if find_pose[2] < 0.6:
                         counter = counter + 1
-                        ep_chassis.drive_speed(x = 0, y = 0.15, z=0, timeout=10)
+                        ep_chassis.drive_speed(x = 0, y = 0.2, z=0, timeout=10)
                 if res.tag_id == 46 and counter == 5:
-                    # Finding correct heading
-                    pose[0][1]= 0
-                    Tag_loc = pose[0]
-                    if tag_orientation[current_tag] == 'right':
-                        Dtag_loc = [0, 0, 1]
-                    elif tag_orientation[current_tag] == 'left':
-                        Dtag_loc = [0, 0, 1]
-                    elif tag_orientation[current_tag] == 'down':
-                        Dtag_loc = [0, 0, 1]
-                    elif tag_orientation[current_tag] == 'up':
-                        Dtag_loc = [0, 0, 1]
+                    counter = counter + 1 
+                    ep_chassis.drive_speed(x = 0, y = 0, z=45, timeout=10)
                     
 
-                    cross_product_AB = np.cross(Tag_loc, Dtag_loc)
-                    mag_cross = np.linalg.norm(cross_product_AB)
-                
-                    dot_AB = np.dot(Tag_loc,Dtag_loc)
-
-
-                    if pose[0][0] < 0:
-                        theta = -(np.arctan2(mag_cross, dot_AB))*180/np.pi
-                    else:
-                        theta = (np.arctan2(mag_cross, dot_AB))*180/np.pi
-                    kt = 1
-
-                    ep_chassis.drive_speed(x = .15, y = 0, z=kt*theta, timeout=10)
-                
+               
 
                 # Once it hits middle of target 46, add one to counter and continue to the right
                 # Distance check to see at what point to make robot continue forward

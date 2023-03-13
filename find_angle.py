@@ -15,7 +15,7 @@ at_detector = Detector(
     refine_edges=1,
     decode_sharpening=0.25,
     debug=0
-)
+
 
 def find_pose_from_tag(K, detection):
     m_half_size = tag_size / 2
