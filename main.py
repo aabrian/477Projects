@@ -43,6 +43,7 @@ def check_visit(x,y): # checks is coordinate input is visited
         if visited[i][0] == y and visited[i][1] == x:
             return True
     return False
+
 def check_surr_cost(n,j,i):
     next_c = ()
     if costs[numrows-(i+1)][j+1] == n-1: # check right
@@ -63,7 +64,6 @@ def check_surr_cost(n,j,i):
         next_c = (j+1,i-1) # add down and right to list
     else:
         print("Error, no coordinate found")
-    
     return next_c[0],next_c[1]
 
 def interp(t):
@@ -122,6 +122,8 @@ def find_pose_from_tag(K, detection):
     p = pnp_ret[2]
 
     return p.reshape((3,)), r.reshape((3,))
+
+
 def find_robot_pos(tag_coord,tag_orientation,robot_tag_pose):
     world_pos = [0,0]
     if tag_orientation == 'right':
@@ -136,8 +138,6 @@ def find_robot_pos(tag_coord,tag_orientation,robot_tag_pose):
     if tag_orientation == 'up':
         world_pos[0] = tag_coord[0]+robot_tag_pose[2]
         world_pos[1] = tag_coord[1]-robot_tag_pose[0]        
-
-        
     return world_pos
 
 def rotation_wa(direction):
@@ -153,7 +153,7 @@ def rotation_wa(direction):
     return np.linalg.inv(rot)
 
 if __name__ == '__main__':
-    # Creating interpolation and desired path
+    # Reading Maze
     file = csv.reader(open(rb'C:\Users\jsche\OneDrive - University of Maryland\Spring 2023\CMSC477\Project1\map.csv'), delimiter=',')
     x = list(file)
     maze = np.array(x).astype("int")
@@ -222,7 +222,7 @@ if __name__ == '__main__':
 
     tag_size=0.2 # tag size in meters
     l = .265
-    l = .265
+    # Library showing aruco tag coordinates
     tag_coords = {32 : [-8.5*l,0],34:[-8*l,-1.5*l],33:[-7.5*l,0],31:[-7.5*l,2*l],35:[-6*l,2.5*l],
     36:[-4*l,2.5*l],42:[-2.5*l,2*l],44:[-2.5*l,0],46:[-2*l,-1.5*l],45:[-1.5*l,0],39:[-4.5*l,-2*l],41:[-4.5*l,-4*l],43:[-1.5*l,2*l],37:[-5*l,-0.5*l],30:[-8.5*l,2*l],40:[-5.5*l,-2*l],}
     tag_orientation  = {30:'left',32:'left',34:'down',33:'right',31:'right',35:'down',36:'down',42:'left',
@@ -278,8 +278,6 @@ if __name__ == '__main__':
                 output_y = K*(y_pos_des - curr_y) + y_vel_des
                 v_w = np.array([output_x,output_y,0])
 
-
-
                 # Converting to v_b
                 rot_wa = rotation_wa(tag_orientation[current_tag])
                 rot_ac = np.transpose(rot_ca)
@@ -288,7 +286,6 @@ if __name__ == '__main__':
                 w2b = np.matmul(rot_bc,np.transpose(rot_wc))
                 kb = 0.5
                 v_b = kb*np.matmul(w2b,v_w)
-
 
                 # Finding correct heading
                 pose[0][1]= 0
@@ -314,12 +311,10 @@ if __name__ == '__main__':
                 else:
                     theta = (np.arctan2(mag_cross, dot_AB))*180/np.pi
                 kt = 1
-
                 # Movement
-                ep_chassis.drive_speed(x = v_b[1], y = v_b[0], z=kt*theta, timeout=.5)
-                time.sleep(0.5)
+                ep_chassis.drive_speed(x = v_b[1], y = v_b[0], z=kt*theta, timeout=1)
+                time.sleep(0.5) # delay to allow for movement to occur
                 t_run = t_run + time_step/interval
-
 
             cv2.imshow("img", img)
             cv2.waitKey(10)

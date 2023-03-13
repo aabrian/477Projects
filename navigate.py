@@ -6,7 +6,6 @@ import time
 import csv
 from robomaster import robot
 from robomaster import camera
-from math import(sin, cos, asin, pi, atan2, atan, acos)
 
 at_detector = Detector(
     families="tag36h11",
@@ -89,11 +88,12 @@ if __name__ == '__main__':
                         ep_chassis.drive_speed(x = 0.15, y = 0, z=0, timeout=10)
                 if counter == 4 and res.tag_id == 44:
                     if find_pose[2] < 0.5:
+                        # GO right
                         counter = counter + 1
                         ep_chassis.drive_speed(x = 0, y = 0.15, z=0, timeout=10)
                 if res.tag_id == 46 and counter == 5:
                     if find_pose[0] < -0.3:
-                        # Finding correct heading
+                        # Rotate towards middle of aruco tag and move right simultaneously
                         pose[0][1]= 0
                         Tag_loc = pose[0]
                         Dtag_loc = [0, 0, 1]
@@ -111,7 +111,7 @@ if __name__ == '__main__':
                         ep_chassis.drive_speed(x = .1, y = 0.15, z=0, timeout=10)
                 if res.tag_id == 45 and counter == 6: 
                     if find_pose[0] < -0.25:
-                        # Finding correct heading
+                        # # Rotate towards middle of aruco tag and move right simultaneously
                         pose[0][1]= 0
                         Tag_loc = pose[0]
                         Dtag_loc = [0, 0, 1]
@@ -124,6 +124,7 @@ if __name__ == '__main__':
                             theta = (np.arctan2(mag_cross, dot_AB))*180/np.pi
                         ep_chassis.drive_speed(x = 0, y = 0.1, z=kt*theta, timeout=10)
                     if find_pose[0] > 0:
+                        # Go forward until goal is reached
                         counter = counter + 1
                         ep_chassis.drive_speed(x = .15, y = 0, z=0, timeout=10)
                 if res.tag_id == 45 and counter == 7: 
