@@ -1,6 +1,9 @@
 from __future__ import print_function
 import cv2 as cv
 import argparse
+from robomaster import robot
+from robomaster import camera
+
 max_value = 255
 max_value_H = 360//2
 low_H = 0
@@ -56,7 +59,7 @@ def on_high_V_thresh_trackbar(val):
 parser = argparse.ArgumentParser(description='Code for Thresholding Operations using inRange tutorial.')
 parser.add_argument('--camera', help='Camera divide number.', default=0, type=int)
 args = parser.parse_args()
-cap = cv.VideoCapture(0)
+# cap = cv.VideoCapture(0)
 cv.namedWindow(window_capture_name)
 cv.namedWindow(window_detection_name)
 cv.createTrackbar(low_H_name, window_detection_name , low_H, max_value_H, on_low_H_thresh_trackbar)
@@ -65,9 +68,15 @@ cv.createTrackbar(low_S_name, window_detection_name , low_S, max_value, on_low_S
 cv.createTrackbar(high_S_name, window_detection_name , high_S, max_value, on_high_S_thresh_trackbar)
 cv.createTrackbar(low_V_name, window_detection_name , low_V, max_value, on_low_V_thresh_trackbar)
 cv.createTrackbar(high_V_name, window_detection_name , high_V, max_value, on_high_V_thresh_trackbar)
+
+ep_robot = robot.Robot()
+ep_robot.initialize(conn_type="ap")
+ep_camera = ep_robot.camera
+ep_camera.start_video_stream(display=False, resolution=camera.STREAM_360P)
+
 while True:
-    
-    ret, frame = cap.read()
+    frame = ep_camera.read_cv2_image(strategy="newest", timeout=0.5)
+    # ret, frame = cap.read()
     if frame is None:
         break
     frame_HSV = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
@@ -77,6 +86,4 @@ while True:
     cv.imshow(window_capture_name, frame)
     cv.imshow(window_detection_name, frame_threshold)
     
-    key = cv.waitKey(30)
-    if key == ord('q') or key == 27:
-        break
+    cv.waitKey(30)

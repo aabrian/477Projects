@@ -13,18 +13,22 @@ from robomaster import camera
 vid = cv2.VideoCapture(0)
 
 
-# ep_robot = robot.Robot()
-# ep_robot.initialize(conn_type="ap")
-# ep_camera = ep_robot.camera
-# ep_camera.start_video_stream(display=False, resolution=camera.STREAM_360P)
+ep_robot = robot.Robot()
+ep_robot.initialize(conn_type="ap")
+ep_camera = ep_robot.camera
+ep_camera.start_video_stream(display=False, resolution=camera.STREAM_360P)
 
 
 while True:
-    ret, frame = vid.read()
-    gray_image = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    mask = cv2.inRange(frame, (112, 0, 20), (255, 145, 33))
-    #cv2.imshow("frame", frame)
-    #cv2.imshow("hsv_image",mask)
+    frame = ep_camera.read_cv2_image(strategy="newest", timeout=0.5)
+    # ret, frame = vid.read()
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    low = (71,130, 46)
+    high = (180,255,255)
+    mask = cv2.inRange(hsv, low, high)
+    mask = cv2.erode(mask, None, iterations=2)
+    mask = cv2.dilate(mask, None, iterations=2)
+    
     cnts = cv2.findContours(mask, cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
     cnts = imutils.grab_contours(cnts)
     w_big = 0
@@ -38,7 +42,12 @@ while True:
             h_big = h
             x_big = x
             y_big = y
-
-    cv2.rectangle(frame, (x_big, y_big), (x_big + w_big, y_big + h_big), (0,0,255), 4)
+    print(w_big/h_big)
+    if w_big/h_big < 2.5:
+        cv2.line(frame, (x_big, y_big), (x_big + w_big, y_big + h_big), (0,0,255), 4)
+    elif w_big/h_big > 6.75:
+        cv2.line(frame, (x_big, y_big), (x_big + w_big, y_big), (0,0,255), 4)
+    else:
+        cv2.rectangle(frame, (x_big, y_big), (x_big + w_big, y_big + h_big), (0,0,255), 4)
     cv2.imshow("Bounding Box",frame)
     cv2.waitKey(10)
