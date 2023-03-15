@@ -24,7 +24,7 @@ while True:
     frame = ep_camera.read_cv2_image(strategy="newest", timeout=0.5)
     # ret, frame = vid.read()
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-    low = (71,130, 46)
+    low = (99,144, 74)
     high = (180,255,255)
     mask = cv2.inRange(hsv, low, high)
     mask = cv2.erode(mask, None, iterations=2)
