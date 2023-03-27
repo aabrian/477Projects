@@ -65,7 +65,7 @@ while True:
 
 
     linesP = cv2.HoughLinesP(edge_frame, 1, np.pi / 180, 50, None, 50, 10)
-    print(l)
+
     if linesP is not None:
         if len(linesP) == 2:
             if (linesP[1][0][1]+linesP[1][0][3])/2 > (linesP[0][0][1]+linesP[0][0][3])/2:
@@ -98,12 +98,13 @@ while True:
        y_out = 0
         
     cv2.rectangle(frame, (x_big, y_big), (x_big + w_big, y_big + h_big), (0,255,255), 4)
+    # cv2.line(frame, (x_big, y_big), (x_big + w_big, y_big + h_big), (0,0,255), 3, cv2.LINE_AA)
     cv2.circle(frame, center, 5, (0, 255, 255), -1)
     
-    # cv2.imshow('masked', mask)
-    # cv2.imshow('or frame', blur)
-    # cv2.imshow('thresh', thresh_frame)
-    # cv2.imshow('edges', edge_frame)
+    cv2.imshow('masked', mask)
+    cv2.imshow('or frame', blur)
+    cv2.imshow('thresh', thresh_frame)
+    cv2.imshow('edges', edge_frame)
     cv2.imshow("bounding",frame)
     cv2.waitKey(10)
 
