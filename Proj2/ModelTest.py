@@ -1,4 +1,5 @@
 from roboflow import Roboflow
+import cv2
 rf = Roboflow(api_key="kKusTXhj0ObVGmi9slHp")
 project = rf.workspace().project("project2-l7rdy")
 model = project.version(4).model
