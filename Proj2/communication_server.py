@@ -10,15 +10,14 @@ import zmq
 context = zmq.Context()
 socket = context.socket(zmq.REP)
 socket.bind("tcp://*:5555")
-print("waiting")
 
 while True:
     #  Wait for next request from client
     message = socket.recv()
-    print(f"Received request: {message}")
+    print("Received request: %s" % message)
 
     #  Do some 'work'
     time.sleep(1)
 
     #  Send reply back to client
-    socket.send_string("World")
+    socket.send(b"World")
