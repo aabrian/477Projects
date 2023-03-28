@@ -69,14 +69,14 @@ cv.createTrackbar(high_S_name, window_detection_name , high_S, max_value, on_hig
 cv.createTrackbar(low_V_name, window_detection_name , low_V, max_value, on_low_V_thresh_trackbar)
 cv.createTrackbar(high_V_name, window_detection_name , high_V, max_value, on_high_V_thresh_trackbar)
 
-# ep_robot = robot.Robot()
-# ep_robot.initialize(conn_type="ap")
-# ep_camera = ep_robot.camera
-# ep_camera.start_video_stream(display=False, resolution=camera.STREAM_360P)
+ep_robot = robot.Robot()
+ep_robot.initialize(conn_type="ap")
+ep_camera = ep_robot.camera
+ep_camera.start_video_stream(display=False, resolution=camera.STREAM_360P)
 
 while True:
-    # frame = ep_camera.read_cv2_image(strategy="newest", timeout=0.5)
-    ret, frame = cap.read()
+    frame = ep_camera.read_cv2_image(strategy="newest", timeout=2.5)
+    # ret, frame = cap.read()
     if frame is None:
         break
     frame_HSV = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
