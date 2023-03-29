@@ -1,0 +1,13 @@
+names:
+- lego
+- robot
+nc: 2
+roboflow:
+  license: CC BY 4.0
+  project: project2-l7rdy
+  url: https://universe.roboflow.com/cmsc-477-spring-2023/project2-l7rdy/dataset/5
+  version: 5
+  workspace: cmsc-477-spring-2023
+test: C:\Users\Brian\Documents\CSMC477\test\images
+train: C:\Users\Brian\Documents\CSMC477\Project2-5\train\images
+val: C:\Users\Brian\Documents\CSMC477\Project2-5\valid\images
