@@ -12,7 +12,7 @@ def pickup():
     ep_gripper.close(power=100)
     time.sleep(1)
     ep_gripper.pause()
-    ep_arm.moveto(x=170, y=-0).wait_for_completed()
+    ep_arm.moveto(x=120, y=30).wait_for_completed()
 
 
 if __name__ == '__main__':
