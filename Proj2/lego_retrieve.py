@@ -67,13 +67,13 @@ if __name__ == '__main__':
                         model.predictor.args.verbose = False
                     results = model.predict(source=frame, show=True,half=True)
                     boxes = results[0].boxes
-                    # ep_chassis.drive_speed(x = 0, y = 0, z = 7.5, timeout=5)
+                    ep_chassis.drive_speed(x = 0, y = 0, z = 5, timeout=10)
                     if len(boxes)>0:
                         box = boxes[0].xyxy  # returns one box
                         lego_center_x = ((box[0,0]+box[0,2])/2).item()
                         lego_center_y = ((box[0,1]+box[0,3])/2).item()
                         if n == 0:
-                            ep_chassis.drive_speed(x = 0, y = 0, z = 3, timeout=5)
+                            ep_chassis.drive_speed(x = 0, y = 0, z = 2, timeout=10)
                             if abs(int(lego_center_y) - frame_center[0]) < 5:
                                 n = 1
                             ep_chassis.drive_speed(x = 0.05, y = 0, z = 0, timeout=10)
