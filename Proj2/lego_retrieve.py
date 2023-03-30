@@ -43,7 +43,8 @@ if __name__ == '__main__':
 
 
     ep_robot = robot.Robot()
-    ep_robot.initialize(conn_type="sta",sn = "3JKCH8800100WV")
+    ep_robot.initialize(conn_type="ap")
+    # ep_robot.initialize(conn_type="sta",sn = "3JKCH8800100WV")
     ep_camera = ep_robot.camera
     ep_camera.start_video_stream(display=False, resolution=camera.STREAM_360P)
     ep_chassis = ep_robot.chassis
@@ -102,11 +103,12 @@ if __name__ == '__main__':
                             print(lego_center_x-frame_center[0])
                             # print(frame_center[0])
                             if n == 0:
-                                ep_chassis.drive_speed(x = 0, y = 0, z = 2, timeout=10)
+                                ep_chassis.drive_speed(x = 0, y = 0, z = 3, timeout=10)
                                 if abs(int(lego_center_x) - frame_center[0]) < 25:
                                     n = 1
                                     ep_chassis.drive_speed(x = 0.05, y = 0, z = 0, timeout=10)
-                            if lego_center_x >300.0 and lego_center_x<342.0 and lego_center_y>195:      
+                            print(lego_center_y)
+                            if lego_center_x >300.0 and lego_center_x<342.0 and lego_center_y>155:      
                                 ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=5)
                                 counter = 1
                                 FLAG = False
@@ -169,6 +171,7 @@ if __name__ == '__main__':
             print("looking for river")
             if linesP is not None:
                 if abs(theta) > 0: # Get correct heading of robot
+                    print("rotating")
                     z_out = Kt*theta
                     ep_chassis.drive_speed(x = 0, y = 0, z = z_out, timeout=1)
                 else:
@@ -191,14 +194,7 @@ if __name__ == '__main__':
                 ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=1)
                 counter == 3
         elif counter == 3:
-            Robot_destiniation(3)
-            Gripped = True
-            while not Gripped:
-                message = str(socket.recv())
-                if message == "True":
-                    Gripped = True
-            time.sleep(3)
-            ep_gripper.sub_status(freq = 1, callback = send_gripper_status)
+            time.sleep(20)
             ep_gripper.open()
             time.sleep(3)
             ep_gripper.pause()

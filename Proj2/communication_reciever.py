@@ -15,8 +15,9 @@ while True:
     ep_robot = robot.Robot()
     ep_robot.initialize(conn_type="sta", sn="3JKCH8800100TY")
     #  Wait for next request from client
-    message = socket.recv()
-    time.sleep(1)
+    message = str(socket.recv())
+    print(message)
+
     if message == "gripped":
         # code to have other robot start moving towards the lake to meet the recieving robot
         print(message)
