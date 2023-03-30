@@ -91,17 +91,12 @@ if __name__ == '__main__':
                     if n == 0:
                         ep_chassis.drive_speed(x = 0, y = 0, z = 5, timeout=10)
                     for box in results[0].boxes:
-                        # print(results[0].names[int(box.cls.cpu().numpy())],box.cls,box.xyxy)
                         print(results[0].names[int(box.cls.cpu().numpy())])
-                        # list.append(results[0].names[int(box.cls.cpu().numpy())])
                         if 'lego' in results[0].names[int(box.cls.cpu().numpy())]:
-                            # print('sees lego')
-                            #box = boxes[0].xyxy  # returns one box
                             box = box.xyxy
                             lego_center_x = ((box[0,0]+box[0,2])/2).item()
                             lego_center_y = ((box[0,1]+box[0,3])/2).item()
                             print(lego_center_x-frame_center[0])
-                            # print(frame_center[0])
                             if n == 0:
                                 ep_chassis.drive_speed(x = 0, y = 0, z = 3, timeout=10)
                                 if abs(int(lego_center_x) - frame_center[0]) < 25:
@@ -168,7 +163,6 @@ if __name__ == '__main__':
         Kx = .005
 
         if counter == 1:
-            print("looking for river")
             if linesP is not None:
                 if abs(theta) > 0: # Get correct heading of robot
                     print("rotating")
@@ -194,7 +188,7 @@ if __name__ == '__main__':
                 ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=1)
                 counter == 3
         elif counter == 3:
-            time.sleep(20)
+            time.sleep(20) # wait for other robot
             ep_gripper.open()
             time.sleep(3)
             ep_gripper.pause()
