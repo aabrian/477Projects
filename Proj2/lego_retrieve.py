@@ -58,7 +58,8 @@ if __name__ == '__main__':
         
         
         if counter == 0:
-            while True:
+            FLAG =True
+            while FLAG:
                 frame = ep_camera.read_cv2_image(strategy="newest", timeout=2.5)
                 frame_center = (int(frame.shape[1]/2),int(frame.shape[0]/2))
                 if frame is not None:
@@ -66,27 +67,30 @@ if __name__ == '__main__':
                         model.predictor.args.verbose = False
                     results = model.predict(source=frame, show=True,half=True)
                     boxes = results[0].boxes
-                    ep_chassis.drive_speed(x = 0, y = 0, z = 5, timeout=10)
+                    if n==0:
+                        ep_chassis.drive_speed(x = 0, y = 0, z = 5, timeout=10)
                     for box in results[0].boxes:
                         # print(results[0].names[int(box.cls.cpu().numpy())],box.cls,box.xyxy)
                         print(results[0].names[int(box.cls.cpu().numpy())])
                         # list.append(results[0].names[int(box.cls.cpu().numpy())])
-                    
                         if 'lego' in results[0].names[int(box.cls.cpu().numpy())]:
                             # print('sees lego')
                             #box = boxes[0].xyxy  # returns one box
                             box = box.xyxy
                             lego_center_x = ((box[0,0]+box[0,2])/2).item()
                             lego_center_y = ((box[0,1]+box[0,3])/2).item()
+                            print(lego_center_x-frame_center[0])
+                            # print(frame_center[0])
                             if n == 0:
                                 ep_chassis.drive_speed(x = 0, y = 0, z = 2, timeout=10)
-                                if abs(int(lego_center_y) - frame_center[0]) < 5:
+                                if abs(int(lego_center_x) - frame_center[0]) < 25:
+                                    print('enters')
                                     n = 1
-                                ep_chassis.drive_speed(x = 0.05, y = 0, z = 0, timeout=10)
+                                    ep_chassis.drive_speed(x = 0.05, y = 0, z = 0, timeout=10)
                             if lego_center_x >300.0 and lego_center_x<342.0 and lego_center_y>195:      
                                 ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=5)
                                 counter = 1
-                                break
+                                FLAG = False
             pickup()
             cv2.destroyWindow("image0.jpg")
 
@@ -143,6 +147,7 @@ if __name__ == '__main__':
         Kx = .005
 
         if counter == 1:
+            print("looking for river")
             if linesP is not None:
                 if abs(theta) > 0: # Get correct heading of robot
                     z_out = Kt*theta
@@ -155,13 +160,13 @@ if __name__ == '__main__':
                     counter = 2
                     time.sleep(0.5)
             else:
-                ep_chassis.drive_speed(x = 0, y = 0, z = 7.5, timeout=1)
+                ep_chassis.drive_speed(x = 0, y = 0, z = 5, timeout=1)
         elif counter == 2: # approach river 
             if abs(error_fb) > 5:
                 x_out = Kx*error_fb
                 ep_chassis.drive_speed(x = x_out, y = 0, z = 0, timeout=1)
             else:
-                ep_chassis.drive_speed(x = x_out, y = 0, z = 0, timeout=1)
+                ep_chassis.drive_speed(x = 2*x_out, y = 0, z = 0, timeout=1)
                 time.sleep(3)
                 x_out = 0
                 ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=1)
