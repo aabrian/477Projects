@@ -1,24 +1,21 @@
-#
-#   Hello World client in Python
-#   Connects REQ socket to tcp://localhost:5555
-#   Sends "Hello" to server, expects "World" back
-#
+# ROBOT 1 is the messenger 
 
 import zmq
 import time
 import robomaster
 from robomaster import robot
+from robomaster import config
 
 
 context = zmq.Context()
 print("Connecting to recieving robot...")
 socket = context.socket(zmq.REQ)
-socket.connect("tcp://10.104.16.30:5555") # figure out IP adress stuff
+socket.connect("tcp://192.168.50.134:5555") # figure out IP adress stuff
 
 #  Do 10 requests, waiting each time for a response
 if __name__ == 'main':
     ep_robot = robot.Robot()
-    ep_robot.initialize(conn_type="ap")
+    ep_robot.initialize(conn_type="sta",sn = "3JKCH8800100WV")
 
     ep_gripper = ep_robot.gripper
     prev_status = None
@@ -46,9 +43,9 @@ if __name__ == 'main':
         message = "arrived"
         socket.send_string(message)
         #now the messanger robot should let go of the block and send a message alerting the recieving robot 
-        ep_gripper.open(power=50)
-        time.sleep(1)
-        ep_gripper.pause()
+        # ep_gripper.open(power=50)
+        # time.sleep(1)
+        # ep_gripper.pause()
 
         if curr_status == robomaster.gripper.GripperStatus.OPEN:
             message = "Open"
