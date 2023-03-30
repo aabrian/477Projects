@@ -29,7 +29,8 @@ if __name__ == '__main__':
     ep_camera = ep_robot.camera
     ep_camera.start_video_stream(display=False, resolution=camera.STREAM_360P)
     #get it into the walking position
-    while True:
+    FLAG = True
+    while FLAG:
         # ret, frame = vid.read()
         frame = ep_camera.read_cv2_image(strategy="newest", timeout=2)
         if frame is not None:
@@ -57,7 +58,8 @@ if __name__ == '__main__':
                     print('Y= ',lego_center_y)
                     if lego_center_x >300.0 and lego_center_x<342.0 and lego_center_y>195:      
                         # continue
-                        break
+                        # break
+                        FLAG=False
                     
             end = time.time()
             # print(1.0 / (end-start))
@@ -65,7 +67,7 @@ if __name__ == '__main__':
     print('gripping')
     # ep_gripper.close(power=100)
     pickup()   
-    time.sleep(5)
+    # time.sleep(5)
   
     
 
