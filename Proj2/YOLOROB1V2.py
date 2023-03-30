@@ -16,6 +16,10 @@ def pickup():
     ep_gripper.pause()
     
     ep_arm.moveto(x=170, y=-0).wait_for_completed()
+def spin():
+    
+
+
 
 
 if __name__ == '__main__':
@@ -29,6 +33,8 @@ if __name__ == '__main__':
     ep_camera = ep_robot.camera
     ep_camera.start_video_stream(display=False, resolution=camera.STREAM_360P)
     #get it into the walking position
+    ep_arm.moveto(x=180, y=-70).wait_for_completed()
+    ep_gripper.open(power=100)    
     FLAG = True
     while FLAG:
         # ret, frame = vid.read()
