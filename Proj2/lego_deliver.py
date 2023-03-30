@@ -18,7 +18,9 @@ if __name__ == '__main__':
     ep_gripper = ep_robot.gripper
     ep_arm = ep_robot.robotic_arm
 
+    l_old = [1,1,2,1]
     counter = 0
+    n = 0
     x_out,y_out,z_out = 0,0,0
 
 
@@ -28,7 +30,7 @@ if __name__ == '__main__':
     # river
     lowb = (100, 75, 61)
     highb = (145,255,255)
-    ep_arm.moveto(x=140, y=40).wait_for_completed() # STARTING POSITION OF GRIPPER
+    ep_arm.moveto(x=180, y=40).wait_for_completed() # STARTING POSITION OF GRIPPER
     ep_gripper.open(power=50)
     time.sleep(1)
     ep_gripper.pause()
@@ -137,7 +139,7 @@ if __name__ == '__main__':
         theta = (diff_right-diff_left)/(l_old[2]-l_old[0]) # Controller to rotate theta by
         Kt = 50
         error_fb_riv = x_goal - h_bigb
-        Kx_riv = .005 
+        Kx_riv = .0075 
         error_fb_end = x_goal_end - h_bigo
         Kx_end = .01
         # error_rl = frame_center[0] - centerl[0]
@@ -181,24 +183,29 @@ if __name__ == '__main__':
                             print(lego_center_x-frame_center[0])
                             # print(frame_center[0])
                             if n == 0:
-                                ep_chassis.drive_speed(x = 0, y = int(lego_center_x) - frame_center[0], z = 0, timeout=10)
-                                if abs(lego_center_x - frame_center[0]) < 25:
+                                if (int(lego_center_x) - frame_center[0]) > 0:
+                                    ep_chassis.drive_speed(x = 0, y = .05, z = 0, timeout=10)
+                                if (int(lego_center_x) - frame_center[0]) < 0:
+                                    ep_chassis.drive_speed(x = 0, y = -.05, z = 0, timeout=10)
+                                if abs(lego_center_x - frame_center[0]) < 15:
                                     n = 1
-                                    ep_chassis.drive_speed(x = 0.05, y = 0, z = 0, timeout=10)
-                            if lego_center_x > 300 and lego_center_x<342.0 and lego_center_y>200:      
-                                ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=5)
-                                counter = 3
-                                FLAG = False
+                                    # ep_chassis.drive_speed(x = 0.05, y = 0, z = 0, timeout=10)
+                                    # if lego_center_x > 300 and lego_center_x<342.0 and lego_center_y>200:      
+                                    #     ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=5)
+                                    counter = 3
+                                    print("Approach River")
+                                    FLAG = False
             cv2.destroyWindow("image0.jpg")
         
         # Approaching river
         elif counter == 3:
             if abs(error_fb_riv) > 5:
                 x_out = Kx_riv*error_fb_riv
+                print(x_out)
                 ep_chassis.drive_speed(x = x_out, y = 0, z = 0, timeout=1)
             else:
-                ep_chassis.drive_speed(x = x_out, y = 0, z = 0, timeout=1)
-                time.sleep(3)
+                ep_chassis.drive_speed(x = .1, y = 0, z = 0, timeout=10)
+                time.sleep(2.5)
                 x_out = 0
                 ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=1)
                 counter = 4
@@ -206,13 +213,13 @@ if __name__ == '__main__':
 
         ###################### INSERT COMMUNICATION and HANDOFF CODE ###################
 
-        # elif counter == 4: # send communication handoff is ready
-        #   ep_gripper.close(power=100)
-        #   time.sleep(1)
-        #   ep_gripper.pause()  
-        #   send communication
-        #   time.sleep(3)
-        #   counter = 5
+        elif counter == 4: # send communication handoff is ready
+          ep_gripper.close(power=100)
+          time.sleep(1)
+          ep_gripper.pause()  
+          # send communication
+          time.sleep(3)
+          counter = 12
 
         ################################################################################
 
