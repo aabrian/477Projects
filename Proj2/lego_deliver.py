@@ -1,3 +1,4 @@
+from ultralytics import YOLO
 import cv2
 import numpy as np
 import time
@@ -6,6 +7,8 @@ from robomaster import robot
 from robomaster import camera
 
 if __name__ == '__main__':
+    model = YOLO("Project2-5\\runs\detect\\train12\weights\\best.pt")
+
     ep_robot = robot.Robot()
     ep_robot.initialize(conn_type="ap")
     ep_camera = ep_robot.camera
@@ -156,15 +159,37 @@ if __name__ == '__main__':
           #if communication recieved:
               counter = 2
         elif counter == 2: # center on other robot 
-            if abs(error_rl) > 5:
-                y_out = Ky*error_rl
-                ep_chassis.drive_speed(x = 0, y = y_out, z = 0, timeout=1)
-            else:
-                # ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=1) # any adjustment needed
-                # time.sleep(3)
-                y_out = 0
-                ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=1)
-                counter = 3
+            FLAG =True
+            while FLAG:
+                frame = ep_camera.read_cv2_image(strategy="newest", timeout=2.5)
+                frame_center = (int(frame.shape[1]/2),int(frame.shape[0]/2))
+                if frame is not None:
+                    if model.predictor:
+                        model.predictor.args.verbose = False
+                    results = model.predict(source=frame, show=True,half=True)
+                    boxes = results[0].boxes
+                    for box in results[0].boxes:
+                        # print(results[0].names[int(box.cls.cpu().numpy())],box.cls,box.xyxy)
+                        print(results[0].names[int(box.cls.cpu().numpy())])
+                        # list.append(results[0].names[int(box.cls.cpu().numpy())])
+                        if 'robot' in results[0].names[int(box.cls.cpu().numpy())]:
+                            # print('sees lego')
+                            #box = boxes[0].xyxy  # returns one box
+                            box = box.xyxy
+                            lego_center_x = ((box[0,0]+box[0,2])/2).item()
+                            lego_center_y = ((box[0,1]+box[0,3])/2).item()
+                            print(lego_center_x-frame_center[0])
+                            # print(frame_center[0])
+                            if n == 0:
+                                ep_chassis.drive_speed(x = 0, y = int(lego_center_x) - frame_center[0], z = 0, timeout=10)
+                                if abs(lego_center_x - frame_center[0]) < 25:
+                                    n = 1
+                                    ep_chassis.drive_speed(x = 0.05, y = 0, z = 0, timeout=10)
+                            if lego_center_x >300.0 and lego_center_x<342.0 and lego_center_y>195:      
+                                ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=5)
+                                counter = 3
+                                FLAG = False
+            cv2.destroyWindow("image0.jpg")
         
         # Approaching river
         elif counter == 3:
