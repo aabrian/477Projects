@@ -23,20 +23,6 @@ def pickup():
     
     ep_arm1.moveto(x=170, y=-0).wait_for_completed()
 
-def send_gripper_status(sub_info):
-    time.sleep(3)
-    global gripper_status
-    gripper_status = sub_info
-    global message
-    message = gripper_status
-    socket.send_string(message)
-    print(message)
-
-def Robot_destiniation(counter):
-    time.sleep(3)
-    if counter == 3:
-        message = "arrived"
-        socket.send_string(message)
 
 if __name__ == '__main__':
     model = YOLO("Project2-5\\runs\detect\\train12\weights\\best.pt")
@@ -52,15 +38,12 @@ if __name__ == '__main__':
     ep_arm1 = ep_robot1.robotic_arm
 
     l_old = [1, 1, 2, 1]
-    counter1 = 1
+    counter1 = 0
     n1 = 0
     x_out,y_out,z_out = 0,0,0
 
-    ################## PARAMETERS TO CHANGE DEPENDING ON LIGHT #####################
+    ################## PARAMETERS OF RETRIEVER BOT #####################
     kernel = (15,15)
-
-    # low = (71,127, 140)
-    # high = (180,255,255)
 
     low = (100, 75, 61)
     high = (145,255,255)
@@ -69,7 +52,7 @@ if __name__ == '__main__':
     time.sleep(1)
     ep_gripper1.pause()
     x_goal = 70
-    ######################### PARAMETERS FOR THE DELIVER ROBOT
+
     ep_robot2 = robot.Robot()
     # ep_robot2.initialize(conn_type="ap")
     ep_robot2.initialize(conn_type="sta", sn="3JKCH8800100TY")
@@ -86,7 +69,7 @@ if __name__ == '__main__':
     x_out,y_out,z_out = 0,0,0
 
 
-    ################## PARAMETERS TO CHANGE DEPENDING ON LIGHT #####################
+    ################## PARAMETERS OF DELIVERY BOT #####################
     kernel = (15,15)
 
     # river
@@ -104,14 +87,12 @@ if __name__ == '__main__':
     x_goal_end = 50
     cameraFLag = 0
     ################################################################################    
-    ################################################################################
+
 
     while True:
         if cameraFLag == 0:
             frame = ep_camera1.read_cv2_image(strategy="newest", timeout=2.5)
             frame_center = (int(frame.shape[1]/2),int(frame.shape[0]/2))
-        
-        
         if counter1 == 0:
             FLAG =True
             while FLAG:
@@ -226,21 +207,22 @@ if __name__ == '__main__':
                 time.sleep(3)
                 x_out = 0
                 ep_chassis1.drive_speed(x = 0, y = 0, z = 0, timeout=1)
-                counter1 == 3
-                counter2 == 0
+                counter1 = 3
+                counter2 = 0
+                ep_camera1.stop_video_stream()
         if counter1 == 4:
             ep_gripper1.open(power=100)
             time.sleep(1)
             ep_gripper2.pause()
-            counter2 == 6
-        if counter1==4:
-            ep_camera1 = ep_robot2.camera
-            ep_camera1.stop_video_stream()
+            counter2 = 6
+            cameraFLag = 1
+        
         ####################### ROBOT 2########################################################
+
         if cameraFLag != 0:
             frame = ep_camera2.read_cv2_image(strategy="newest", timeout=2.5)
             frame_center = (int(frame.shape[1]/2),int(frame.shape[0]/2))
-
+    
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         # BLUE RIVER DETECTION
         maskb = cv2.inRange(hsv, lowb, highb)
@@ -318,13 +300,8 @@ if __name__ == '__main__':
                 time.sleep(1)
                 z_out = 0
                 ep_chassis2.drive_speed(x = 0, y = 0, z = 0, timeout=1)
-                counter2 = 1
+                counter2 = 2
                 time.sleep(0.5)
-        elif counter2 == 1: # wait for communication
-            # message = str(socket.recv())
-            # if message == "arrived":
-            # time.sleep(20)
-            counter2 = 2
         elif counter2 == 2: # center on other robot 
             FLAG =True
             while FLAG:
@@ -379,14 +356,7 @@ if __name__ == '__main__':
             ep_gripper2.close(power=100)
             time.sleep(1)
             ep_gripper2.pause()  
-        #   message = "True"
-        #   socket.send(message)
-        #   counter = 5
-        # elif counter == 5: 
-        #   message = str(socket.recv())
-        #   if message == "open":
-            # time.sleep(10)
-            counter1 =4
+            counter1 = 4
 
         elif counter2 == 6:
             ep_chassis2.drive_speed(x = -.15, y = 0, z = 0, timeout=5)
@@ -422,22 +392,7 @@ if __name__ == '__main__':
             counter2 = 12
             ep_chassis2.drive_speed(x = 0, y = 0, z = 0, timeout=5)
         elif counter2 == 12:
-            ep_chassis2.drive_speed(x = 0, y = 0, z = 20, timeout=10)        
-        # elif counter1 == 3:
-            # Robot_destiniation(3)
-            Gripped = True
-            # while not Gripped:
-                # message = str(socket.recv())
-                # if message == "True":
-                    # Gripped = True
-            time.sleep(3)
-            ep_gripper1.sub_status(freq = 1, callback = send_gripper_status)
-            ep_gripper1.open()
-            time.sleep(3)
-            ep_gripper1.pause()
-            ep_chassis1.drive_speed(x = -.25, y = 0, z = 0, timeout=1)
-            time.sleep(2)
-            ep_chassis1.drive_speed(x = 0, y = 0, z = 0, timeout=1)
+            ep_chassis2.drive_speed(x = 0, y = 0, z = 20, timeout=10)
             
         
         cv2.rectangle(frame, (x_big, y_big), (x_big + w_big, y_big + h_big), (0,255,255), 4)
