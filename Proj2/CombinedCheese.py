@@ -184,6 +184,7 @@ if __name__ == '__main__':
         if counter1 == 1:
             print("looking for river")
             if linesP is not None:
+                print(theta)
                 if abs(theta) > 0: # Get correct heading of robot
                     print(z_out)
                     z_out = Kt*theta
@@ -207,16 +208,16 @@ if __name__ == '__main__':
                 time.sleep(3)
                 x_out = 0
                 ep_chassis1.drive_speed(x = 0, y = 0, z = 0, timeout=1)
-                counter1 = 3
-                counter2 = 0
-                ep_camera1.stop_video_stream()
+                counter1 == 3
+                counter2 == 0
         if counter1 == 4:
             ep_gripper1.open(power=100)
             time.sleep(1)
             ep_gripper2.pause()
-            counter2 = 6
-            cameraFLag = 1
-        
+            counter2 == 6
+        if counter1==4:
+            ep_camera1 = ep_robot2.camera
+            ep_camera1.stop_video_stream()
         ####################### ROBOT 2########################################################
 
         if cameraFLag != 0:
