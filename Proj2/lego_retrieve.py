@@ -58,7 +58,6 @@ if __name__ == '__main__':
         
         
         if counter == 0:
-            print("entering counter")
             while True:
                 frame = ep_camera.read_cv2_image(strategy="newest", timeout=2.5)
                 frame_center = (int(frame.shape[1]/2),int(frame.shape[0]/2))
@@ -77,8 +76,6 @@ if __name__ == '__main__':
                             if abs(int(lego_center_y) - frame_center[0]) < 5:
                                 n = 1
                             ep_chassis.drive_speed(x = 0.05, y = 0, z = 0, timeout=10)
-                            ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=5)
-                            time.sleep(1)
                         if lego_center_x >300.0 and lego_center_x<342.0 and lego_center_y>195:      
                             ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=5)
                             counter = 1
