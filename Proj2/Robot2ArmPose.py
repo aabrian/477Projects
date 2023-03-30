@@ -28,6 +28,10 @@ if __name__ == '__main__':
     ep_gripper.close(power=100)
     time.sleep(1)
     ep_gripper.pause()
+    ep_arm.moveto(x=180, y=-30).wait_for_completed()
+    ep_gripper.open(power=50)
+    time.sleep(1)
+    ep_gripper.pause()
     # ep_arm.move(x=-40, y=0).wait_for_completed()
     # time.sleep(20)
 
