@@ -202,6 +202,7 @@ if __name__ == '__main__':
             ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=1)
             counter = 9
         elif counter == 9:
+            ep_arm.moveto(x=180, y=-30).wait_for_completed()
             ep_gripper.open(power=50)
             time.sleep(1)
             ep_gripper.pause()
