@@ -24,7 +24,9 @@ def Robot_destiniation(counter):
     time.sleep(3)
     if counter == 3:
         message = "arrived"
+        print(message)
         socket.send_string(message)
+        print(message)
 
     
 #  Do 10 requests, waiting each time for a response
@@ -42,9 +44,10 @@ if __name__ == '__main__':
 
     # now waits to recieve a reply from the reciever that it has gripped the lego
     # message = "False"
-    Gripped = True
+    Gripped = False
     while not Gripped:
         message = str(socket.recv())
+        print("in while loop")
         if message == "True":
             Gripped = True
     # wait for a couple seconds then let go of the lego and send message to the recieving robot then this robot is done 
