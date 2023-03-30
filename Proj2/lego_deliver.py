@@ -35,7 +35,7 @@ if __name__ == '__main__':
     x_goal = 60
 
     # goal
-    lowo = (0,186,107)
+    lowo = (0,186,165)
     higho = (19,255,255)
     x_goal_end = 50
 
