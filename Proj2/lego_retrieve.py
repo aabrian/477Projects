@@ -75,7 +75,7 @@ if __name__ == '__main__':
                             ep_chassis.drive_speed(x = 0, y = 0, z = 2, timeout=10)
                             if abs(int(lego_center_y) - frame_center[0]) < 5:
                                 n = 1
-                            ep_chassis.drive_speed(x = 0.05, y = 0, z = 0, timeout=10)
+                                ep_chassis.drive_speed(x = 0.05, y = 0, z = 0, timeout=10)
                         if lego_center_x >300.0 and lego_center_x<342.0 and lego_center_y>195:      
                             ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=5)
                             counter = 1
@@ -148,7 +148,7 @@ if __name__ == '__main__':
                     counter = 2
                     time.sleep(0.5)
             else:
-                ep_chassis.drive_speed(x = 0, y = 0, z = 7.5, timeout=1)
+                ep_chassis.drive_speed(x = 0, y = 0, z = 5, timeout=1)
         elif counter == 2: # approach river 
             if abs(error_fb) > 5:
                 x_out = Kx*error_fb
