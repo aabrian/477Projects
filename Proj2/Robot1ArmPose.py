@@ -22,7 +22,7 @@ def pickup():
     time.sleep(1)
     ep_gripper.pause()
     
-    ep_arm.moveto(x=170, y=-0).wait_for_completed()
+    # ep_arm.moveto(x=170, y=-0).wait_for_completed()
 
 
     # ep_arm.move(x=-40, y=0).wait_for_completed()
