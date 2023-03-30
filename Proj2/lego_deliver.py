@@ -136,7 +136,7 @@ if __name__ == '__main__':
                 counter = 1
                 time.sleep(0.5)
         elif counter == 1: # wait for communication
-            message = socket.recv()
+            message = str(socket.recv())
             if message == "arrived":
                 counter = 2
         elif counter == 2: # center on other robot 
@@ -197,7 +197,7 @@ if __name__ == '__main__':
           socket.send(message)
           counter = 5
         elif counter == 5: 
-          message = socket.recv()
+          message = str(socket.recv())
           if message == "open":
             counter = 6
 
