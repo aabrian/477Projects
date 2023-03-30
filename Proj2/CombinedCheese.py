@@ -42,7 +42,7 @@ if __name__ == '__main__':
     n1 = 0
     x_out,y_out,z_out = 0,0,0
 
-    ################## PARAMETERS OF RETRIEVER BOT #####################
+    ###################### PARAMETERS OF RETRIEVER BOT ##########################
     kernel = (15,15)
 
     low = (100, 75, 61)
@@ -69,15 +69,15 @@ if __name__ == '__main__':
     x_out,y_out,z_out = 0,0,0
 
 
-    ################## PARAMETERS OF DELIVERY BOT #####################
+    ######################## PARAMETERS OF DELIVERY BOT ############################
     kernel = (15,15)
+    ep_arm2.moveto(x=180, y=40).wait_for_completed() # STARTING POSITION OF GRIPPER
+    ep_gripper2.open(power=50)
+    time.sleep(1)
 
     # river
     lowb = (100, 75, 61)
     highb = (145,255,255)
-    ep_arm2.moveto(x=180, y=40).wait_for_completed() # STARTING POSITION OF GRIPPER
-    ep_gripper2.open(power=50)
-    time.sleep(1)
     ep_gripper2.pause()
     x_goal = 60
 
@@ -86,9 +86,9 @@ if __name__ == '__main__':
     higho = (19,255,255)
     x_goal_end = 50
     cameraFLag = 0
+
+
     ################################################################################    
-
-
     while True:
         if cameraFLag == 0:
             frame = ep_camera1.read_cv2_image(strategy="newest", timeout=2.5)
@@ -218,6 +218,8 @@ if __name__ == '__main__':
         if counter1==4:
             ep_camera1 = ep_robot2.camera
             ep_camera1.stop_video_stream()
+        
+
         ####################### ROBOT 2########################################################
 
         if cameraFLag != 0:
