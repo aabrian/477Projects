@@ -1,3 +1,4 @@
+from ultralytics import YOLO
 import cv2
 import numpy as np
 import time
@@ -5,7 +6,22 @@ import imutils
 from robomaster import robot
 from robomaster import camera
 
+def pickup():
+    ep_gripper.open(power=50)
+    time.sleep(1)
+    ep_gripper.pause()
+    
+
+    ep_gripper.close(power=100)
+    time.sleep(1)
+    ep_gripper.pause()
+    
+    ep_arm.moveto(x=170, y=-0).wait_for_completed()
+
 if __name__ == '__main__':
+    model = YOLO("Project2-5\\runs\detect\\train12\weights\\best.pt")
+
+
     ep_robot = robot.Robot()
     ep_robot.initialize(conn_type="ap")
     ep_camera = ep_robot.camera
@@ -17,6 +33,7 @@ if __name__ == '__main__':
 
     l_old = [1, 1, 2, 1]
     counter = 0
+    n = 0
     x_out,y_out,z_out = 0,0,0
 
     ################## PARAMETERS TO CHANGE DEPENDING ON LIGHT #####################
@@ -27,7 +44,10 @@ if __name__ == '__main__':
 
     low = (100, 75, 61)
     high = (145,255,255)
-    ep_arm.moveto(x=170, y=-0).wait_for_completed() # position of gripper 
+    ep_arm.moveto(x=180, y=-70).wait_for_completed()
+    ep_gripper.open(power=50)
+    time.sleep(1)
+    ep_gripper.pause()
     x_goal = 70
 
     ################################################################################
@@ -36,15 +56,82 @@ if __name__ == '__main__':
         frame = ep_camera.read_cv2_image(strategy="newest", timeout=2.5)
         frame_center = (int(frame.shape[1]/2),int(frame.shape[0]/2))
         
-        ############## INSERT MACHINE LEARNING CODE AND MOVEMENT TO PICK UP LEGO ##################
+        
+        if counter == 0:
+            print("entering counter")
+            FLAG = True
+            while FLAG:
+                # ret, frame = vid.read()
+                frame = ep_camera.read_cv2_image(strategy="newest", timeout=2)
+                if n ==0:
+                    ep_chassis.drive_speed(x = 0, y = 0, z = 15, timeout=5)
+                if frame is not None:
+                    start = time.time()
+                    if model.predictor:
+                        model.predictor.args.verbose = False
+                    results = model.predict(source=frame, show=True,half=True)
+                    boxes = results[0].boxes
+                    # print(results[0].names[])
+                    # list = []
+                    for box in results[0].boxes:
+                    #     # print(results[0].names[int(box.cls.cpu().numpy())],box.cls,box.xyxy)
+                        print(results[0].names[int(box.cls.cpu().numpy())])
+                        # list.append(results[0].names[int(box.cls.cpu().numpy())])
+                    
+                        if 'lego' in results[0].names[int(box.cls.cpu().numpy())]:
+                            # print('sees lego')
+                            #box = boxes[0].xyxy  # returns one box
+                            box = box.xyxy
+                            lego_center_x = ((box[0,0]+box[0,2])/2).item()
+                            lego_center_y = ((box[0,1]+box[0,3])/2).item()
+                            if n == 0:
+                                ep_chassis.drive_speed(x = 0, y = 0, z = -(int(lego_center_y) - frame_center[0])/40, timeout=2)
+                                n = 1
+                            if abs(int(lego_center_y) - frame_center[0]) < 30:
+                                ep_chassis.drive_speed(x = 0, y = 0, z = 0)
+                                print('stops')
+                                n=2
+                            if n==2:
+                                ep_chassis.drive_speed(x = 0.05, y = 0, z = 0, timeout=10)
+                            # ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=5)
+                            # time.sleep(1)
+                            ## close gripper when in range
+                            # print('X=',lego_center_x)
+                            # print('Y= ',lego_center_y)
+                            if lego_center_x >300.0 and lego_center_x<342.0 and lego_center_y>195:      
+                                # continue
+                                # break
+                                counter = 1
+                                FLAG=False
+            # while True:
+            #     frame = ep_camera.read_cv2_image(strategy="newest", timeout=2.5)
+            #     frame_center = (int(frame.shape[1]/2),int(frame.shape[0]/2))
+            #     if frame is not None:
+            #         if model.predictor:
+            #             model.predictor.args.verbose = False
+            #         results = model.predict(source=frame, show=True,half=True)
+            #         boxes = results[0].boxes
+            #         # ep_chassis.drive_speed(x = 0, y = 0, z = 7.5, timeout=5)
+            #         if len(boxes)>0:
+            #             box = boxes[0].xyxy  # returns one box
+            #             lego_center_x = ((box[0,0]+box[0,2])/2).item()
+            #             lego_center_y = ((box[0,1]+box[0,3])/2).item()
+            #             if n == 0:
+            #                 ep_chassis.drive_speed(x = 0, y = 0, z = 3, timeout=5)
+            #                 if abs(int(lego_center_y) - frame_center[0]) < 5:
+            #                     n = 1
+            #             if n==1:
+            #                 ep_chassis.drive_speed(x = 0.05, y = 0, z = 0, timeout=10)
+            #                 # ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=5)
+            #                 # time.sleep(1)
+            #             if lego_center_x >300.0 and lego_center_x<342.0 and lego_center_y>195:      
+            #                 ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=5)
+            #                 counter = 1
+            #                 break
+            pickup()
+            ep_camera.stop_video_stream()
+            cv2.destroyWindow("image0.jpg")
 
-        # add in counters
-            # 1. rotate until seen (like goal code)
-            # 2. center in y direction
-            # 3. move in x direction until desired height found
-            # 4. grab sequence
-
-        ###########################################################################################
 
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         mask = cv2.inRange(hsv, low, high)
@@ -97,7 +184,7 @@ if __name__ == '__main__':
         error_fb = x_goal - h_big
         Kx = .005
 
-        if counter == 0:
+        if counter == 1:
             if linesP is not None:
                 if abs(theta) > 0: # Get correct heading of robot
                     z_out = Kt*theta
@@ -111,7 +198,7 @@ if __name__ == '__main__':
                     time.sleep(0.5)
             else:
                 ep_chassis.drive_speed(x = 0, y = 0, z = 7.5, timeout=1)
-        elif counter == 1: # approach river 
+        elif counter == 2: # approach river 
             if abs(error_fb) > 5:
                 x_out = Kx*error_fb
                 ep_chassis.drive_speed(x = x_out, y = 0, z = 0, timeout=1)
@@ -120,7 +207,7 @@ if __name__ == '__main__':
                 time.sleep(3)
                 x_out = 0
                 ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=1)
-                counter == 2
+                counter == 3
             
         cv2.rectangle(frame, (x_big, y_big), (x_big + w_big, y_big + h_big), (0,255,255), 4)
         cv2.circle(frame, center, 5, (0, 255, 255), -1)

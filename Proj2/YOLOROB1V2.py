@@ -16,9 +16,6 @@ def pickup():
     ep_gripper.pause()
     
     ep_arm.moveto(x=170, y=-0).wait_for_completed()
-def spin():
-    
-
 
 
 
