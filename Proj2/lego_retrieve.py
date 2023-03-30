@@ -150,7 +150,7 @@ if __name__ == '__main__':
         if counter == 1:
             if linesP is not None:
                 if abs(theta) > 0: # Get correct heading of robot
-                    print("rotating")
+                    # print("rotating")
                     z_out = Kt*theta
                     ep_chassis.drive_speed(x = 0, y = 0, z = z_out, timeout=1)
                 else:
@@ -171,8 +171,10 @@ if __name__ == '__main__':
                 time.sleep(3)
                 x_out = 0
                 ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=1)
-                counter == 3
+                counter = 3
+                print('approach done')
         elif counter == 3:
+            print('stopped')
             time.sleep(20)
             ep_gripper.open()
             time.sleep(3)
