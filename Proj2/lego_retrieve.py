@@ -140,9 +140,7 @@ if __name__ == '__main__':
 
         ###########################################################################################
         
-        # cv2.imshow('masked', mask)
-        # cv2.imshow('blurred', blur)
-        # cv2.imshow('thresh', thresh_frame)
-        # cv2.imshow('edges', edge_frame)
+        cv2.rectangle(frame, (x_big, y_big), (x_big + w_big, y_big + h_big), (0,255,255), 4)
+        cv2.circle(frame, center, 5, (0, 255, 255), -1)
         cv2.imshow("bounding",frame)
         cv2.waitKey(10)

@@ -26,6 +26,9 @@ if __name__ == '__main__':
     lowb = (100, 75, 61)
     highb = (145,255,255)
     ep_arm.moveto(x=100, y=40).wait_for_completed() # STARTING POSITION OF GRIPPER
+    ep_gripper.open(power=50)
+    time.sleep(1)
+    ep_gripper.pause()
     x_goal = 60
 
     # goal
@@ -164,14 +167,12 @@ if __name__ == '__main__':
         # add in counters
             # 1. wait for okay from other robot, begin handoff code
         # elif counter == 4: # send communication handoff is ready
-        #     if communication recieved:
-        #             ep_gripper.open(power=50)
-        #             time.sleep(1)
-        #             ep_gripper.pause()
-        #             ep_chassis.drive_speed(x = x_out, y = -.25, z = 0, timeout=1)
-        #             time.sleep(2)
-        #             ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=1)
-        #             counter = 5
+        #   ep_gripper.close(power=100)
+        #   time.sleep(1)
+        #   ep_gripper.pause()  
+        #   send communication
+        #   time.sleep(3)
+        #   counter = 5
 
 
 
@@ -211,3 +212,10 @@ if __name__ == '__main__':
             time.sleep(2)
             counter = 11
             ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=5)
+
+        cv2.rectangle(frame, (x_bigb, y_bigb), (x_bigb + w_bigb, y_bigb + h_bigb), (255,0,0), 4)
+        cv2.circle(frame, centerb, 5, (255, 0, 0), -1)
+        cv2.rectangle(frame, (x_bigo, y_bigo), (x_bigo + w_bigo, y_bigo + h_bigo), (0,165,255), 4)
+        cv2.circle(frame, centero, 5, (0, 165, 255), -1)
+        cv2.imshow("bounding",frame)
+        cv2.waitKey(10)
