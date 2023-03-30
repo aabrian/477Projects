@@ -14,7 +14,14 @@ socket.bind("tcp://*:5555")
 while True:
     #  Wait for next request from client
     message = socket.recv()
-    print("Received request: %s" % message)
+    if message == "gripped":
+        # code to have other robot start moving towards the lake to meet the recieving robot
+
+    if message == "arrived":
+        # grip the block 
+
+    if message == "open":
+        #can begin moving to the destination
 
     #  Do some 'work'
     time.sleep(1)
