@@ -52,7 +52,7 @@ if __name__ == '__main__':
     ep_arm1 = ep_robot1.robotic_arm
 
     l_old = [1, 1, 2, 1]
-    counter1 = 0
+    counter1 = 1
     n1 = 0
     x_out,y_out,z_out = 0,0,0
 
@@ -102,13 +102,14 @@ if __name__ == '__main__':
     lowo = (0,186,165)
     higho = (19,255,255)
     x_goal_end = 50
-
+    cameraFLag = 0
     ################################################################################    
     ################################################################################
 
     while True:
-        frame = ep_camera1.read_cv2_image(strategy="newest", timeout=2.5)
-        frame_center = (int(frame.shape[1]/2),int(frame.shape[0]/2))
+        if cameraFLag == 0:
+            frame = ep_camera1.read_cv2_image(strategy="newest", timeout=2.5)
+            frame_center = (int(frame.shape[1]/2),int(frame.shape[0]/2))
         
         
         if counter1 == 0:
@@ -136,10 +137,10 @@ if __name__ == '__main__':
                             print(lego_center_y)
                             # print(frame_center[0])
                             if n1 == 0:
-                                ep_chassis1.drive_speed(x = 0, y = 0, z = 2, timeout=10)
+                                ep_chassis1.drive_speed(x = 0, y = 0, z = 4, timeout=10)
                                 if abs(int(lego_center_x) - frame_center[0]) < 25:
                                     n1 = 1
-                                    ep_chassis1.drive_speed(x = 0.05, y = 0, z = 0, timeout=10)
+                                    ep_chassis1.drive_speed(x = 0.1, y = 0, z = 0, timeout=10)
                             if lego_center_x >300.0 and lego_center_x<342.0 and lego_center_y>130:      
                                 ep_chassis1.drive_speed(x = 0, y = 0, z = 0, timeout=5)
                                 counter1 = 1
@@ -203,6 +204,7 @@ if __name__ == '__main__':
             print("looking for river")
             if linesP is not None:
                 if abs(theta) > 0: # Get correct heading of robot
+                    print(z_out)
                     z_out = Kt*theta
                     ep_chassis1.drive_speed(x = 0, y = 0, z = z_out, timeout=1)
                 else:
@@ -215,6 +217,7 @@ if __name__ == '__main__':
             else:
                 ep_chassis1.drive_speed(x = 0, y = 0, z = 5, timeout=1)
         elif counter1 == 2: # approach river 
+            print("approaching river")
             if abs(error_fb) > 5:
                 x_out = Kx*error_fb
                 ep_chassis1.drive_speed(x = x_out, y = 0, z = 0, timeout=1)
@@ -225,17 +228,18 @@ if __name__ == '__main__':
                 ep_chassis1.drive_speed(x = 0, y = 0, z = 0, timeout=1)
                 counter1 == 3
                 counter2 == 0
-        if counter1 ==4:
+        if counter1 == 4:
             ep_gripper1.open(power=100)
             time.sleep(1)
             ep_gripper2.pause()
             counter2 == 6
-
-        ep_camera1 = ep_robot2.camera
-        ep_camera1.stop_video_stream()
+        if counter1==4:
+            ep_camera1 = ep_robot2.camera
+            ep_camera1.stop_video_stream()
         ####################### ROBOT 2########################################################
-        frame = ep_camera2.read_cv2_image(strategy="newest", timeout=2.5)
-        frame_center = (int(frame.shape[1]/2),int(frame.shape[0]/2))
+        if cameraFLag != 0:
+            frame = ep_camera2.read_cv2_image(strategy="newest", timeout=2.5)
+            frame_center = (int(frame.shape[1]/2),int(frame.shape[0]/2))
 
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         # BLUE RIVER DETECTION
@@ -436,7 +440,7 @@ if __name__ == '__main__':
             ep_chassis1.drive_speed(x = 0, y = 0, z = 0, timeout=1)
             
         
-        # cv2.rectangle(frame, (x_big, y_big), (x_big + w_big, y_big + h_big), (0,255,255), 4)
-        # cv2.circle(frame, center, 5, (0, 255, 255), -1)
-        # cv2.imshow("bounding",frame)
-        # cv2.waitKey(10)
+        cv2.rectangle(frame, (x_big, y_big), (x_big + w_big, y_big + h_big), (0,255,255), 4)
+        cv2.circle(frame, center, 5, (0, 255, 255), -1)
+        cv2.imshow("bounding",frame)
+        cv2.waitKey(10)
