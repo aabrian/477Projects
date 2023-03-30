@@ -229,5 +229,7 @@ if __name__ == '__main__':
         cv2.circle(frame, centerb, 5, (255, 0, 0), -1)
         cv2.rectangle(frame, (x_bigo, y_bigo), (x_bigo + w_bigo, y_bigo + h_bigo), (0,165,255), 4)
         cv2.circle(frame, centero, 5, (0, 165, 255), -1)
+        cv2.rectangle(frame, (x_bigl, y_bigl), (x_bigl + w_bigl, y_bigl + h_bigl), (0,165,255), 4)
+        cv2.circle(frame, centerl, 5, (0, 255, 255), -1)  
         cv2.imshow("bounding",frame)
         cv2.waitKey(10)
