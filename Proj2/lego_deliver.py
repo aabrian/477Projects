@@ -19,7 +19,7 @@ if __name__ == '__main__':
     ep_arm = ep_robot.robotic_arm
 
     l_old = [1,1,2,1]
-    counter = 0
+    counter = 5
     n = 0
     x_out,y_out,z_out = 0,0,0
 
@@ -37,7 +37,7 @@ if __name__ == '__main__':
     x_goal = 60
 
     # goal
-    lowo = (0,186,107)
+    lowo = (0,186,165)
     higho = (19,255,255)
     x_goal_end = 50
 
