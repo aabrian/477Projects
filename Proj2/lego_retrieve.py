@@ -23,21 +23,6 @@ def pickup():
     
     ep_arm.moveto(x=170, y=-0).wait_for_completed()
 
-def send_gripper_status(sub_info):
-    time.sleep(3)
-    global gripper_status
-    gripper_status = sub_info
-    global message
-    message = gripper_status
-    socket.send_string(message)
-    print(message)
-
-def Robot_destiniation(counter):
-    time.sleep(3)
-    if counter == 3:
-        message = "arrived"
-        socket.send_string(message)
-
 if __name__ == '__main__':
     model = YOLO("Project2-5\\runs\detect\\train12\weights\\best.pt")
 
@@ -108,7 +93,7 @@ if __name__ == '__main__':
                                     n = 1
                                     ep_chassis.drive_speed(x = 0.05, y = 0, z = 0, timeout=10)
                             print(lego_center_y)
-                            if lego_center_x >300.0 and lego_center_x<342.0 and lego_center_y>155:      
+                            if lego_center_x >300.0 and lego_center_x<342.0 and lego_center_y>180:      
                                 ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=5)
                                 counter = 1
                                 FLAG = False
@@ -194,6 +179,7 @@ if __name__ == '__main__':
                 ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=1)
                 counter == 3
         elif counter == 3:
+            ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=25)
             time.sleep(20)
             ep_gripper.open()
             time.sleep(3)
