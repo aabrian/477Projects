@@ -15,21 +15,26 @@ while True:
     ep_robot = robot.Robot()
     ep_robot.initialize(conn_type="sta", sn="3JKCH8800100TY")
     #  Wait for next request from client
-    message = str(socket.recv())
-    print(message)
-
+    message = socket.recv()
+    time.sleep(1)
     if message == "gripped":
         # code to have other robot start moving towards the lake to meet the recieving robot
         print(message)
 
     if message == "arrived":
-        # grip the block 
         print(message)
+        # code for robot to start moving towards the river and also code to grip the lego 
 
+        # once the robot has gripped send  "True" message to the messanger so that messanger robot 
+        #knows to let go 
+        message = "True"
+        socket.send(message)
+       
 
     if message == "open":
-        #can begin moving to the destination
         print(message)
+        # code for robot to start moving towards the goal
+        
 
-    #  Do some 'work'
+
     time.sleep(1)

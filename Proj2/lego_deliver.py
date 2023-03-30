@@ -16,7 +16,8 @@ if __name__ == '__main__':
     model = YOLO("Project2-5\\runs\detect\\train12\weights\\best.pt")
 
     ep_robot = robot.Robot()
-    ep_robot.initialize(conn_type="sta", sn="3JKCH8800100TY")
+    ep_robot.initialize(conn_type="ap")
+    # ep_robot.initialize(conn_type="sta", sn="3JKCH8800100TY")
     ep_camera = ep_robot.camera
     ep_camera.start_video_stream(display=False, resolution=camera.STREAM_360P)
     ep_chassis = ep_robot.chassis
@@ -25,7 +26,7 @@ if __name__ == '__main__':
     ep_arm = ep_robot.robotic_arm
 
     l_old = [1,1,2,1]
-    counter = 5
+    counter = 0
     n = 0
     x_out,y_out,z_out = 0,0,0
 
@@ -136,9 +137,10 @@ if __name__ == '__main__':
                 counter = 1
                 time.sleep(0.5)
         elif counter == 1: # wait for communication
-            message = str(socket.recv())
-            if message == "arrived":
-                counter = 2
+            # message = str(socket.recv())
+            # if message == "arrived":
+            # time.sleep(20)
+            counter = 2
         elif counter == 2: # center on other robot 
             FLAG =True
             while FLAG:
@@ -190,15 +192,16 @@ if __name__ == '__main__':
                 counter = 4
 
         elif counter == 4: # send communication handoff is ready
-          ep_gripper.close(power=100)
-          time.sleep(1)
-          ep_gripper.pause()  
-          message = "True"
-          socket.send(message)
-          counter = 5
-        elif counter == 5: 
-          message = str(socket.recv())
-          if message == "open":
+            ep_gripper.close(power=100)
+            time.sleep(1)
+            ep_gripper.pause()  
+        #   message = "True"
+        #   socket.send(message)
+        #   counter = 5
+        # elif counter == 5: 
+        #   message = str(socket.recv())
+        #   if message == "open":
+            time.sleep(10)
             counter = 6
 
         elif counter == 6:
