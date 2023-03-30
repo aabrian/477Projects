@@ -5,12 +5,18 @@ import time
 import imutils
 from robomaster import robot
 from robomaster import camera
+import zmq
+
+
+context = zmq.Context()
+socket = context.socket(zmq.REP)
+socket.bind("tcp://*:5555")
 
 if __name__ == '__main__':
     model = YOLO("Project2-5\\runs\detect\\train12\weights\\best.pt")
 
     ep_robot = robot.Robot()
-    ep_robot.initialize(conn_type="ap")
+    ep_robot.initialize(conn_type="sta", sn="3JKCH8800100TY")
     ep_camera = ep_robot.camera
     ep_camera.start_video_stream(display=False, resolution=camera.STREAM_360P)
     ep_chassis = ep_robot.chassis
@@ -40,10 +46,6 @@ if __name__ == '__main__':
     lowo = (0,186,165)
     higho = (19,255,255)
     x_goal_end = 50
-
-    # lego
-    lowl = (0,186,107)
-    highl = (19,255,255)
 
     ################################################################################
 
@@ -90,27 +92,6 @@ if __name__ == '__main__':
         else:
             cv2.line(frame, (l_old[0], l_old[1]), (l_old[2], l_old[3]), (0,0,255), 3, cv2.LINE_AA)
 
-        # # LEGO DETECTION
-        # maskl = cv2.inRange(hsv, lowl, highl)
-        # mask_boundl = cv2.erode(maskl, None, iterations=2)
-        # mask_boundl = cv2.dilate(maskl, None, iterations=2)
-        # thresh_framel = cv2.threshold(mask_boundl, thresh, 255, cv2.THRESH_BINARY)[1]
-        # blurl = cv2.GaussianBlur(thresh_framel, kernel, 0) 
-        # edge_framel = cv2.Canny(blurl, 30, 150)
-        # cntsl = cv2.findContours(mask_boundl, cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
-        # cntsl = imutils.grab_contours(cntsl)
-        # w_bigl,h_bigl,x_bigl,y_bigl = 0,0,0,0
-        # if cntsl is not None:
-        #     for i in cntsl:
-        #         xl,yl,wl,hl = cv2.boundingRect(i)
-        #         if hl/wl < 1:
-        #             if wl > w_bigl and hl > h_bigl:
-        #                 w_bigo = wl
-        #                 h_bigo = hl
-        #                 x_bigo = xl
-        #                 y_bigo = yl
-        #     centerl = (int(x_bigl + (w_bigl/2)),int(y_bigl + (h_bigl/2)))
-
         # GOAL DETECTION
         masko = cv2.inRange(hsv, lowo, higho)
         mask_boundo = cv2.erode(masko, None, iterations=2)
@@ -142,8 +123,6 @@ if __name__ == '__main__':
         Kx_riv = .0075 
         error_fb_end = x_goal_end - h_bigo
         Kx_end = .01
-        # error_rl = frame_center[0] - centerl[0]
-        # Ky = .01
 
         if counter == 0: # rotating towards river
             if abs(theta) > 0:
@@ -156,10 +135,10 @@ if __name__ == '__main__':
                 ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=1)
                 counter = 1
                 time.sleep(0.5)
-
         elif counter == 1: # wait for communication
-          #if communication recieved:
-              counter = 2
+            message = socket.recv()
+            if message == "arrived":
+                counter = 2
         elif counter == 2: # center on other robot 
             FLAG =True
             while FLAG:
@@ -210,58 +189,57 @@ if __name__ == '__main__':
                 ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=1)
                 counter = 4
 
-
-        ###################### INSERT COMMUNICATION and HANDOFF CODE ###################
-
         elif counter == 4: # send communication handoff is ready
           ep_gripper.close(power=100)
           time.sleep(1)
           ep_gripper.pause()  
-          # send communication
-          time.sleep(3)
-          counter = 12
+          message = "True"
+          socket.send(message)
+          counter = 5
+        elif counter == 5: 
+          message = socket.recv()
+          if message == "open":
+            counter = 6
 
-        ################################################################################
-
-        elif counter == 5:
+        elif counter == 6:
             ep_chassis.drive_speed(x = -.15, y = 0, z = 0, timeout=5)
             time.sleep(2)
-            counter = 6
-        elif counter == 6:
+            counter = 7
+        elif counter == 7:
             ep_chassis.drive_speed(x = 0, y = 0, z = 7.5, timeout=5)
             if abs(centero[0] - frame_center[0]) < 5:
-                counter = 7
+                counter = 8
                 ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=1)
-        elif counter == 7:
+        elif counter == 8:
             if abs(error_fb_end) > 5:
                 x_out = Kx_end*error_fb_end
                 ep_chassis.drive_speed(x = x_out, y = 0, z = 0, timeout=1)
             else:
                 ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=1)
                 time.sleep(1)
-                counter = 8
-        elif counter == 8:
+                counter = 9
+        elif counter == 9:
             ep_chassis.drive_speed(x = .15, y = 0, z = 0, timeout=10)
             time.sleep(2.75)
             ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=1)
-            counter = 9
-        elif counter == 9:
+            counter = 10
+        elif counter == 10:
             ep_arm.moveto(x=180, y=-30).wait_for_completed()
             ep_gripper.open(power=50)
             time.sleep(1)
             ep_gripper.pause()
-            counter = 10
-        elif counter == 10:
+            counter = 11
+        elif counter == 11:
             ep_chassis.drive_speed(x = -.15, y = 0, z = 0, timeout=5)
             time.sleep(2)
-            counter = 11
+            counter = 12
             ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=5)
+        elif counter == 12:
+            ep_chassis.drive_speed(x = 0, y = 0, z = 20, timeout=10)
 
         cv2.rectangle(frame, (x_bigb, y_bigb), (x_bigb + w_bigb, y_bigb + h_bigb), (255,0,0), 4)
         cv2.circle(frame, centerb, 5, (255, 0, 0), -1)
         cv2.rectangle(frame, (x_bigo, y_bigo), (x_bigo + w_bigo, y_bigo + h_bigo), (0,165,255), 4)
         cv2.circle(frame, centero, 5, (0, 165, 255), -1)
-        # cv2.rectangle(frame, (x_bigl, y_bigl), (x_bigl + w_bigl, y_bigl + h_bigl), (0,165,255), 4)
-        # cv2.circle(frame, centerl, 5, (0, 255, 255), -1)  
         cv2.imshow("bounding",frame)
         cv2.waitKey(10)

@@ -5,6 +5,11 @@ import time
 import imutils
 from robomaster import robot
 from robomaster import camera
+import zmq
+
+context = zmq.Context()
+socket = context.socket(zmq.REQ)
+socket.connect("tcp://192.168.50.134:5555") # figure out IP adress stuff
 
 def pickup():
     ep_gripper.open(power=50)
@@ -18,12 +23,27 @@ def pickup():
     
     ep_arm.moveto(x=170, y=-0).wait_for_completed()
 
+def send_gripper_status(sub_info):
+    time.sleep(3)
+    global gripper_status
+    gripper_status = sub_info
+    global message
+    message = gripper_status
+    socket.send_string(message)
+    print(message)
+
+def Robot_destiniation(counter):
+    time.sleep(3)
+    if counter == 3:
+        message = "arrived"
+        socket.send_string(message)
+
 if __name__ == '__main__':
     model = YOLO("Project2-5\\runs\detect\\train12\weights\\best.pt")
 
 
     ep_robot = robot.Robot()
-    ep_robot.initialize(conn_type="ap")
+    ep_robot.initialize(conn_type="sta",sn = "3JKCH8800100WV")
     ep_camera = ep_robot.camera
     ep_camera.start_video_stream(display=False, resolution=camera.STREAM_360P)
     ep_chassis = ep_robot.chassis
@@ -170,24 +190,21 @@ if __name__ == '__main__':
                 x_out = 0
                 ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=1)
                 counter == 3
-            
-        cv2.rectangle(frame, (x_big, y_big), (x_big + w_big, y_big + h_big), (0,255,255), 4)
-        cv2.circle(frame, center, 5, (0, 255, 255), -1)
-
-        ###################### INSERT COMMUNICATION AND HANDOFF CODE ##############################
-
-        # add in counters
-            # 1. wait for okay from other robot, begin handoff code
-        # elif counter == 4: # send communication handoff is ready
-        #     if communication recieved:
-        #             ep_gripper.open(power=50)
-        #             time.sleep(1)
-        #             ep_gripper.pause()
-        #             ep_chassis.drive_speed(x = -.25, y = 0, z = 0, timeout=1)
-        #             time.sleep(2)
-        #             ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=1)
-
-        ###########################################################################################
+        elif counter == 3:
+            Robot_destiniation(3)
+            Gripped = True
+            while not Gripped:
+                message = str(socket.recv())
+                if message == "True":
+                    Gripped = True
+            time.sleep(3)
+            ep_gripper.sub_status(freq = 1, callback = send_gripper_status)
+            ep_gripper.open()
+            time.sleep(3)
+            ep_gripper.pause()
+            ep_chassis.drive_speed(x = -.25, y = 0, z = 0, timeout=1)
+            time.sleep(2)
+            ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=1)
         
         cv2.rectangle(frame, (x_big, y_big), (x_big + w_big, y_big + h_big), (0,255,255), 4)
         cv2.circle(frame, center, 5, (0, 255, 255), -1)
