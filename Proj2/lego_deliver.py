@@ -36,6 +36,10 @@ if __name__ == '__main__':
     higho = (19,255,255)
     x_goal_end = 50
 
+    # lego
+    lowl = (0,186,107)
+    highl = (19,255,255)
+
     ################################################################################
 
 
@@ -81,6 +85,27 @@ if __name__ == '__main__':
         else:
             cv2.line(frame, (l_old[0], l_old[1]), (l_old[2], l_old[3]), (0,0,255), 3, cv2.LINE_AA)
 
+        # LEGO DETECTION
+        maskl = cv2.inRange(hsv, lowl, highl)
+        mask_boundl = cv2.erode(maskl, None, iterations=2)
+        mask_boundl = cv2.dilate(maskl, None, iterations=2)
+        thresh_framel = cv2.threshold(mask_boundl, thresh, 255, cv2.THRESH_BINARY)[1]
+        blurl = cv2.GaussianBlur(thresh_framel, kernel, 0) 
+        edge_framel = cv2.Canny(blurl, 30, 150)
+        cntsl = cv2.findContours(mask_boundl, cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+        cntsl = imutils.grab_contours(cntsl)
+        w_bigl,h_bigl,x_bigl,y_bigl = 0,0,0,0
+        if cntsl is not None:
+            for i in cntsl:
+                xl,yl,wl,hl = cv2.boundingRect(i)
+                if hl/wl < 1:
+                    if wl > w_bigl and hl > h_bigl:
+                        w_bigo = wl
+                        h_bigo = hl
+                        x_bigo = xl
+                        y_bigo = yl
+            centerl = (int(x_bigl + (w_bigl/2)),int(y_bigl + (h_bigl/2)))
+
         # GOAL DETECTION
         masko = cv2.inRange(hsv, lowo, higho)
         mask_boundo = cv2.erode(masko, None, iterations=2)
@@ -103,7 +128,6 @@ if __name__ == '__main__':
             centero = (int(x_bigo + (w_bigo/2)),int(y_bigo + (h_bigo/2)))
         
 
-        
         # error calculations
         diff_left = l_old[1] - y_bigb
         diff_right = l_old[3] - y_bigb
@@ -113,6 +137,8 @@ if __name__ == '__main__':
         Kx_riv = .005 
         error_fb_end = x_goal_end - h_bigo
         Kx_end = .01
+        error_rl = frame_center[0] - centerl[0]
+        Ky = .01
 
         if counter == 0: # rotating towards river
             if abs(theta) > 0:
@@ -125,29 +151,20 @@ if __name__ == '__main__':
                 ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=1)
                 counter = 1
                 time.sleep(0.5)
-        
-            ###################### INSERT COMMUNICATION CODE ##############################
 
-            # add in counters
-                # 1. wait for okay from first robot, flip counter
-                    # if counter == 1, wait for signal
-                    # once signal found, counter = 2
-                # 2. Center on other robot using machine learning, flip counter
-                    # if counter == 2, lr movement on robot or lego
-                    # error_rl = center_bot[0] - frame_center[0]
-                    # Ky = .01
-            # elif counter == 2: # center on other robot 
-            #     if abs(error_rl) > 5:
-            #         y_out = Ky*error_rl
-            #         ep_chassis.drive_speed(x = 0, y = y_out, z = 0, timeout=1)
-            #     else:
-            #         # ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=1) # any adjustment needed
-            #         # time.sleep(3)
-            #         y_out = 0
-            #         ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=1)
-            #         counter = 3
-
-            ################################################################################
+        elif counter == 1: # wait for communication
+          #if communication recieved:
+              counter = 2
+        elif counter == 2: # center on other robot 
+            if abs(error_rl) > 5:
+                y_out = Ky*error_rl
+                ep_chassis.drive_speed(x = 0, y = y_out, z = 0, timeout=1)
+            else:
+                # ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=1) # any adjustment needed
+                # time.sleep(3)
+                y_out = 0
+                ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=1)
+                counter = 3
         
         # Approaching river
         elif counter == 3:
@@ -164,8 +181,6 @@ if __name__ == '__main__':
 
         ###################### INSERT COMMUNICATION and HANDOFF CODE ###################
 
-        # add in counters
-            # 1. wait for okay from other robot, begin handoff code
         # elif counter == 4: # send communication handoff is ready
         #   ep_gripper.close(power=100)
         #   time.sleep(1)
@@ -173,9 +188,6 @@ if __name__ == '__main__':
         #   send communication
         #   time.sleep(3)
         #   counter = 5
-
-
-
 
         ################################################################################
 
@@ -206,7 +218,6 @@ if __name__ == '__main__':
             ep_gripper.open(power=50)
             time.sleep(1)
             ep_gripper.pause()
-            print("Lego dropped")
             counter = 10
         elif counter == 10:
             ep_chassis.drive_speed(x = -.15, y = 0, z = 0, timeout=5)
