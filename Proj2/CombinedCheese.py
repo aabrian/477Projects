@@ -29,7 +29,7 @@ if __name__ == '__main__':
 
 
     ep_robot1 = robot.Robot()
-    ep_robot1.initialize(conn_type="sta",sn = "3JKCH8800100WV")
+    ep_robot1.initialize(conn_type="sta",sn = "3JKCH88001011D")
     ep_camera1 = ep_robot1.camera
     ep_camera1.start_video_stream(display=False, resolution=camera.STREAM_360P)
     ep_chassis1 = ep_robot1.chassis
@@ -55,7 +55,9 @@ if __name__ == '__main__':
 
     ep_robot2 = robot.Robot()
     # ep_robot2.initialize(conn_type="ap")
+    
     ep_robot2.initialize(conn_type="sta", sn="3JKCH8800100TY")
+    # 3JKCH8800100WV
     ep_camera2 = ep_robot2.camera
     ep_camera2.start_video_stream(display=False, resolution=camera.STREAM_360P)
     ep_chassis2 = ep_robot2.chassis
@@ -122,7 +124,7 @@ if __name__ == '__main__':
                                 if abs(int(lego_center_x) - frame_center[0]) < 25:
                                     n1 = 1
                                     ep_chassis1.drive_speed(x = 0.1, y = 0, z = 0, timeout=10)
-                            if lego_center_x >300.0 and lego_center_x<342.0 and lego_center_y>130:      
+                            if lego_center_x >300.0 and lego_center_x<342.0 and lego_center_y>110:      
                                 ep_chassis1.drive_speed(x = 0, y = 0, z = 0, timeout=5)
                                 counter1 = 1
                                 FLAG = False
@@ -199,27 +201,26 @@ if __name__ == '__main__':
             else:
                 ep_chassis1.drive_speed(x = 0, y = 0, z = 5, timeout=1)
         elif counter1 == 2: # approach river 
-            print("approaching river")
             if abs(error_fb) > 5:
+                print("approaching river")
                 x_out = Kx*error_fb
                 ep_chassis1.drive_speed(x = x_out, y = 0, z = 0, timeout=1)
             else:
+                print("river found")
                 ep_chassis1.drive_speed(x = 2*x_out, y = 0, z = 0, timeout=1)
                 time.sleep(3)
                 x_out = 0
                 ep_chassis1.drive_speed(x = 0, y = 0, z = 0, timeout=1)
-                counter1 == 3
-                counter2 == 0
+                counter1 = 3
+                counter2 = 0
+        
         if counter1 == 4:
             ep_gripper1.open(power=100)
             time.sleep(1)
-            ep_gripper2.pause()
+            ep_gripper1.pause()
             counter2 == 6
-        if counter1==4:
-            ep_camera1 = ep_robot2.camera
+            ep_chassis1.drive_speed(x = -.15, y = 0, z = 0, timeout=5)
             ep_camera1.stop_video_stream()
-        
-
         ####################### ROBOT 2########################################################
 
         if cameraFLag != 0:
@@ -287,7 +288,7 @@ if __name__ == '__main__':
         # error calculations
         diff_left = l_old[1] - y_bigb
         diff_right = l_old[3] - y_bigb
-        theta = (diff_right-diff_left)/(l_old[2]-l_old[0]) # Controller to rotate theta by
+        theta2 = (diff_right-diff_left)/(l_old[2]-l_old[0]) # Controller to rotate theta by
         Kt = 50
         error_fb_riv = x_goal - h_bigb
         Kx_riv = .0075 
@@ -295,13 +296,14 @@ if __name__ == '__main__':
         Kx_end = .01
 
         if counter2 == 0: # rotating towards river
+            print("robot 2 locating river")
             if abs(theta) > 0:
-                z_out = Kt*theta
-                ep_chassis2.drive_speed(x = 0, y = 0, z = z_out, timeout=1)
+                z_out2 = Kt*theta2
+                print(z_out2)
+                ep_chassis2.drive_speed(x = 0, y = 0, z = z_out2, timeout=1)
             else:
                 ep_chassis2.drive_speed(x = 0, y = 0, z = 2.25*z_out, timeout=1)
                 time.sleep(1)
-                z_out = 0
                 ep_chassis2.drive_speed(x = 0, y = 0, z = 0, timeout=1)
                 counter2 = 2
                 time.sleep(0.5)
