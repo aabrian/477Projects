@@ -12,6 +12,8 @@ if __name__ == '__main__':
     ep_camera.start_video_stream(display=False, resolution=camera.STREAM_360P)
     ep_chassis = ep_robot.chassis
     ep_arm = ep_robot.robotic_arm
+    ep_gripper = ep_robot.gripper
+    ep_arm = ep_robot.robotic_arm
 
     l_old = [1, 1, 2, 1]
     counter = 0
@@ -96,24 +98,20 @@ if __name__ == '__main__':
         Kx = .005
 
         if counter == 0:
-            if abs(theta) > 0:
-                z_out = Kt*theta
-                ep_chassis.drive_speed(x = 0, y = 0, z = z_out, timeout=1)
+            if linesP is not None:
+                if abs(theta) > 0: # Get correct heading of robot
+                    z_out = Kt*theta
+                    ep_chassis.drive_speed(x = 0, y = 0, z = z_out, timeout=1)
+                else:
+                    ep_chassis.drive_speed(x = 0, y = 0, z = 2.25*z_out, timeout=1)
+                    time.sleep(1)
+                    z_out = 0
+                    ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=1)
+                    counter = 2
+                    time.sleep(0.5)
             else:
-                ep_chassis.drive_speed(x = 0, y = 0, z = 2.25*z_out, timeout=1)
-                time.sleep(1)
-                z_out = 0
-                ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=1)
-                counter = 2
-                time.sleep(0.5)
-        elif counter == 1:
-            if abs(error_rl) > 10:
-                #y_out = Ky*error_rl
-                y_out = 0
-            else:
-                y_out = 0
-                counter == 2
-        elif counter == 2:
+                ep_chassis.drive_speed(x = 0, y = 0, z = 7.5, timeout=1)
+        elif counter == 1: # approach river 
             if abs(error_fb) > 5:
                 x_out = Kx*error_fb
                 ep_chassis.drive_speed(x = x_out, y = 0, z = 0, timeout=1)
@@ -122,7 +120,7 @@ if __name__ == '__main__':
                 time.sleep(3)
                 x_out = 0
                 ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=1)
-                counter == 3
+                counter == 2
             
         cv2.rectangle(frame, (x_big, y_big), (x_big + w_big, y_big + h_big), (0,255,255), 4)
         cv2.circle(frame, center, 5, (0, 255, 255), -1)
@@ -130,10 +128,15 @@ if __name__ == '__main__':
         ###################### INSERT COMMUNICATION AND HANDOFF CODE ##############################
 
         # add in counters
-            # 1. activate other robot to begin sequence
-            # 2. wait until response
-            # 3. Response will tell when to complete handoff
-            # 4. let go of LEGO
+            # 1. wait for okay from other robot, begin handoff code
+        # elif counter == 4: # send communication handoff is ready
+        #     if communication recieved:
+        #             ep_gripper.open(power=50)
+        #             time.sleep(1)
+        #             ep_gripper.pause()
+        #             ep_chassis.drive_speed(x = -.25, y = 0, z = 0, timeout=1)
+        #             time.sleep(2)
+        #             ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=1)
 
         ###########################################################################################
         
