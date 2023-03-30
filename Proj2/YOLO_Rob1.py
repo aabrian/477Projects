@@ -8,8 +8,6 @@ def pickup():
     time.sleep(1)
     ep_gripper.pause()
     
-    # ep_arm.moveto(x=100, y=20).wait_for_completed()
-    ep_arm.moveto(x=180, y=-70).wait_for_completed()
 
     ep_gripper.close(power=100)
     time.sleep(1)
@@ -24,10 +22,12 @@ if __name__ == '__main__':
     # vid = cv2.VideoCapture(0)
     ep_robot = robot.Robot()
     ep_robot.initialize(conn_type="ap")
+    ep_chassis = ep_robot.chassis
     ep_arm = ep_robot.robotic_arm
     ep_gripper = ep_robot.gripper
     ep_camera = ep_robot.camera
     ep_camera.start_video_stream(display=False, resolution=camera.STREAM_360P)
+    ep_arm.moveto(x=180, y=-70).wait_for_completed()
     #get it into the walking position
     while True:
         # ret, frame = vid.read()
@@ -40,25 +40,23 @@ if __name__ == '__main__':
             boxes = results[0].boxes
             if len(boxes)>0:
                 box = boxes[0].xyxy  # returns one box
-                # print(box)
                 lego_center_x = ((box[0,0]+box[0,2])/2).item()
                 lego_center_y = ((box[0,1]+box[0,3])/2).item()
-
-                ## close gripper when in range
+                ep_chassis.drive_speed(x = 0.05, y = 0, z = 0, timeout=10)
+                # close gripper when in range
                 print('X=',lego_center_x)
                 print('Y= ',lego_center_y)
-                if lego_center_x >300.0 and lego_center_x<342.0 and lego_center_y>195:      
-                    continue
-                    # break
+                if lego_center_x >300.0 and lego_center_x<342.0 and lego_center_y>195:
+                    ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=5)      
+                    break
                     
             end = time.time()
             print(1.0 / (end-start))
-    ep_camera.stop_video_stream()
+    # ep_camera.stop_video_stream()
     print('gripping')
-    # ep_gripper.close(power=100)
     pickup()   
     time.sleep(5)
   
     
-
+    cv2.destroyWindow("image0.jpg")
     print('done!')
