@@ -17,6 +17,10 @@ while True:
     #  Wait for next request from client
     message = socket.recv()
     time.sleep(1)
+    if message == "gripped":
+        # code to have other robot start moving towards the lake to meet the recieving robot
+        print(message)
+
     if message == "arrived":
         print(message)
         # code for robot to start moving towards the river and also code to grip the lego 
