@@ -155,7 +155,7 @@ if __name__ == '__main__':
                         # print(results[0].names[int(box.cls.cpu().numpy())],box.cls,box.xyxy)
                         print(results[0].names[int(box.cls.cpu().numpy())])
                         # list.append(results[0].names[int(box.cls.cpu().numpy())])
-                        if 'lego' in results[0].names[int(box.cls.cpu().numpy())]:
+                        if 'robot' in results[0].names[int(box.cls.cpu().numpy())]:
                             # print('sees lego')
                             #box = boxes[0].xyxy  # returns one box
                             box = box.xyxy
