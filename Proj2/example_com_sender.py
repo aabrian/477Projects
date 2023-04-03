@@ -8,7 +8,7 @@ from robomaster import config
 #  Socket to talk to server
 context = zmq.Context()
 socket = context.socket(zmq.REQ)
-socket.connect("tcp://10.104.17.232:5555")
+socket.connect("tcp://192.168.50.134:5555")
 print("Connecting to ROBOT2…")
 
 
