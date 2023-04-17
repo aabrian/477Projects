@@ -21,7 +21,7 @@ if __name__ == '__main__':
     # Use vid instead of ep_camera to use your laptop's webcam
     # vid = cv2.VideoCapture(0)
     ep_robot = robot.Robot()
-    ep_robot.initialize(conn_type="ap")
+    ep_robot.initialize(conn_type="sta", sn="3JKCH8800100TY")
     ep_chassis = ep_robot.chassis
     ep_arm = ep_robot.robotic_arm
     ep_gripper = ep_robot.gripper

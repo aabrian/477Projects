@@ -145,7 +145,8 @@ if __name__ == '__main__':
 
         if counter == 1:
             if linesP is not None:
-                if abs(theta) > 0: # Rotate towards river using hough transformations
+                if abs(theta) > 0: # Get correct heading of robot
+                    print("rotating")
                     z_out = Kt*theta
                     ep_chassis.drive_speed(x = 0, y = 0, z = z_out, timeout=1)
                 else:
@@ -165,9 +166,9 @@ if __name__ == '__main__':
                 ep_chassis.drive_speed(x = 2*x_out, y = 0, z = 0, timeout=1)
                 time.sleep(3)
                 x_out = 0
-                ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=20)
+                ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=1)
                 counter == 3
-        elif counter == 3: # Wait a certain time then opne gripper
+        elif counter == 3:
             time.sleep(20)
             ep_gripper.open()
             time.sleep(3)
