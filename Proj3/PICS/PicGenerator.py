@@ -13,7 +13,7 @@ if __name__ == '__main__':
     ep_camera = ep_robot.camera
     ep_camera.start_video_stream(display=False, resolution=camera.STREAM_720P)
     
-    for i in range(301,330):
+    for i in range(385,500):
         if i%4==0:
             ep_chassis.drive_speed(x = .3, y = 0, z = 0, timeout=1)
         elif i%4==1:
@@ -25,12 +25,14 @@ if __name__ == '__main__':
             # print('count')
         
         # input("Press Enter . . .")
+        time.sleep(1)
         print(i)
         print("taking photo")
+        ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=1)
         img = ep_camera.read_cv2_image(strategy="newest", timeout=1)
         time.sleep(2)
         filename = str(i)
-        filename = "C:\\Users\\brian\\Documents\\CMSC477\\Projects\\Proj3\\PICS\\"+filename + ".jpg"
+        filename = filename + ".jpg"
         cv2.imwrite(filename, img)
         print("done")
     ep_camera.stop_video_stream()

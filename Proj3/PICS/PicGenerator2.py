@@ -5,7 +5,7 @@ from robomaster import robot
 from robomaster import camera
 import keyboard
 global i
-i = 311
+i = 328
 def take_pic(i):
         print(i)
         # print("taking photo")
@@ -13,7 +13,7 @@ def take_pic(i):
         img = ep_camera.read_cv2_image(strategy="newest", timeout=4)
         # time.sleep(2)
         filename = str(i)
-        filename = "C:\\Users\\brian\\Documents\\CMSC477\\Projects\\Proj3\\PICS\\"+filename + ".jpg"
+        filename = "\\Proj3\\PICS\\"+filename + ".jpg"
         cv2.imwrite(filename, img)
         # print("done")
         
