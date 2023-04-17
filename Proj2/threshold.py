@@ -76,6 +76,8 @@ ep_camera.start_video_stream(display=False, resolution=camera.STREAM_360P)
 ep_chassis = ep_robot.chassis
 ep_arm = ep_robot.robotic_arm
 
+ep_arm.moveto(x=120, y=45).wait_for_completed()
+
 
 
 while True:
@@ -87,9 +89,9 @@ while True:
     frame_HSV = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
     frame_threshold = cv.inRange(frame_HSV, (low_H, low_S, low_V), (high_H, high_S, high_V))
     
-    
     cv.imshow(window_capture_name, frame)
-    cv.imshow(window_detection_name, frame_threshold)
+    cv.imshow(window_detection_name,frame)
+    cv.imshow('hasv',frame_threshold)
     
     key = cv.waitKey(30)
     if key == ord('q') or key == 27:
