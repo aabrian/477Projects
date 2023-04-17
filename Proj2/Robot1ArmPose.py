@@ -49,9 +49,9 @@ if __name__ == '__main__':
     ep_arm = ep_robot.robotic_arm
     ep_gripper = ep_robot.gripper
     ep_arm.sub_position(freq=5, callback=sub_data_handler)
-    pickup()
+    #pickup()
     # putdown()
-    openGripper()
+    # openGripper()
     # time.sleep(1)
     ep_arm.unsub_position()
 

@@ -134,14 +134,9 @@ if __name__ == '__main__':
                 time.sleep(1)
                 z_out = 0
                 ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=1)
-                counter = 1
+                counter = 2
                 time.sleep(0.5)
-        elif counter == 1: # wait for communication
-            # message = str(socket.recv())
-            # if message == "arrived":
-            # time.sleep(20)
-            counter = 2
-        elif counter == 2: # center on other robot 
+        elif counter == 2: # center on other robot using model
             FLAG =True
             while FLAG:
                 frame = ep_camera.read_cv2_image(strategy="newest", timeout=2.5)
@@ -155,7 +150,7 @@ if __name__ == '__main__':
                         # print(results[0].names[int(box.cls.cpu().numpy())],box.cls,box.xyxy)
                         print(results[0].names[int(box.cls.cpu().numpy())])
                         # list.append(results[0].names[int(box.cls.cpu().numpy())])
-                        if 'lego' in results[0].names[int(box.cls.cpu().numpy())]:
+                        if 'robot' in results[0].names[int(box.cls.cpu().numpy())]:
                             # print('sees lego')
                             #box = boxes[0].xyxy  # returns one box
                             box = box.xyxy
@@ -186,34 +181,30 @@ if __name__ == '__main__':
                 ep_chassis.drive_speed(x = x_out, y = 0, z = 0, timeout=1)
             else:
                 ep_chassis.drive_speed(x = .1, y = 0, z = 0, timeout=10)
-                time.sleep(2.5)
+                time.sleep(2.25)
                 x_out = 0
                 ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=1)
                 counter = 4
 
-        elif counter == 4: # send communication handoff is ready
+        elif counter == 4: # Grip lego and wait for first robot to release
             ep_gripper.close(power=100)
             time.sleep(1)
-            ep_gripper.pause()  
-        #   message = "True"
-        #   socket.send(message)
-        #   counter = 5
-        # elif counter == 5: 
-        #   message = str(socket.recv())
-        #   if message == "open":
+            ep_gripper.pause()
             time.sleep(10)
             counter = 6
 
+        # Goal Piece 
         elif counter == 6:
             ep_chassis.drive_speed(x = -.15, y = 0, z = 0, timeout=5)
-            time.sleep(2)
+            time.sleep(1.5)
             counter = 7
-        elif counter == 7:
+
+        elif counter == 7: # center on piece with rotation
             ep_chassis.drive_speed(x = 0, y = 0, z = 7.5, timeout=5)
             if abs(centero[0] - frame_center[0]) < 5:
                 counter = 8
                 ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=1)
-        elif counter == 8:
+        elif counter == 8: # appraoch goal piece
             if abs(error_fb_end) > 5:
                 x_out = Kx_end*error_fb_end
                 ep_chassis.drive_speed(x = x_out, y = 0, z = 0, timeout=1)
@@ -221,23 +212,27 @@ if __name__ == '__main__':
                 ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=1)
                 time.sleep(1)
                 counter = 9
-        elif counter == 9:
+    
+        elif counter == 9: 
             ep_chassis.drive_speed(x = .15, y = 0, z = 0, timeout=10)
             time.sleep(2.75)
             ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=1)
             counter = 10
-        elif counter == 10:
+
+        elif counter == 10: # release piece on goal
             ep_arm.moveto(x=180, y=-30).wait_for_completed()
             ep_gripper.open(power=50)
-            time.sleep(1)
+            time.sleep(0.75)
             ep_gripper.pause()
             counter = 11
+
         elif counter == 11:
             ep_chassis.drive_speed(x = -.15, y = 0, z = 0, timeout=5)
             time.sleep(2)
             counter = 12
             ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=5)
-        elif counter == 12:
+
+        elif counter == 12: # celebrate!
             ep_chassis.drive_speed(x = 0, y = 0, z = 20, timeout=10)
 
         cv2.rectangle(frame, (x_bigb, y_bigb), (x_bigb + w_bigb, y_bigb + h_bigb), (255,0,0), 4)

@@ -29,7 +29,6 @@ if __name__ == '__main__':
 
     ep_robot = robot.Robot()
     ep_robot.initialize(conn_type="ap")
-    # ep_robot.initialize(conn_type="sta",sn = "3JKCH8800100WV")
     ep_camera = ep_robot.camera
     ep_camera.start_video_stream(display=False, resolution=camera.STREAM_360P)
     ep_chassis = ep_robot.chassis
@@ -44,9 +43,6 @@ if __name__ == '__main__':
 
     ################## PARAMETERS TO CHANGE DEPENDING ON LIGHT #####################
     kernel = (15,15)
-
-    # low = (71,127, 140)
-    # high = (180,255,255)
 
     low = (100, 75, 61)
     high = (145,255,255)
@@ -77,7 +73,7 @@ if __name__ == '__main__':
                         ep_chassis.drive_speed(x = 0, y = 0, z = 5, timeout=10)
                     for box in results[0].boxes:
                         print(results[0].names[int(box.cls.cpu().numpy())])
-                        if 'lego' in results[0].names[int(box.cls.cpu().numpy())]:
+                        if 'robot' in results[0].names[int(box.cls.cpu().numpy())]:
                             box = box.xyxy
                             lego_center_x = ((box[0,0]+box[0,2])/2).item()
                             lego_center_y = ((box[0,1]+box[0,3])/2).item()
@@ -149,8 +145,7 @@ if __name__ == '__main__':
 
         if counter == 1:
             if linesP is not None:
-                if abs(theta) > 0: # Get correct heading of robot
-                    print("rotating")
+                if abs(theta) > 0: # Rotate towards river using hough transformations
                     z_out = Kt*theta
                     ep_chassis.drive_speed(x = 0, y = 0, z = z_out, timeout=1)
                 else:
@@ -162,7 +157,7 @@ if __name__ == '__main__':
                     time.sleep(0.5)
             else:
                 ep_chassis.drive_speed(x = 0, y = 0, z = 5, timeout=1)
-        elif counter == 2: # approach river 
+        elif counter == 2: # Approach river using position controller
             if abs(error_fb) > 5:
                 x_out = Kx*error_fb
                 ep_chassis.drive_speed(x = x_out, y = 0, z = 0, timeout=1)
@@ -170,9 +165,9 @@ if __name__ == '__main__':
                 ep_chassis.drive_speed(x = 2*x_out, y = 0, z = 0, timeout=1)
                 time.sleep(3)
                 x_out = 0
-                ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=1)
+                ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=20)
                 counter == 3
-        elif counter == 3:
+        elif counter == 3: # Wait a certain time then opne gripper
             time.sleep(20)
             ep_gripper.open()
             time.sleep(3)
