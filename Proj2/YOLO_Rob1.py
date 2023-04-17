@@ -42,12 +42,12 @@ if __name__ == '__main__':
                 box = boxes[0].xyxy  # returns one box
                 lego_center_x = ((box[0,0]+box[0,2])/2).item()
                 lego_center_y = ((box[0,1]+box[0,3])/2).item()
-                ep_chassis.drive_speed(x = 0.05, y = 0, z = 0, timeout=10)
+                # ep_chassis.drive_speed(x = 0.05, y = 0, z = 0, timeout=10)
                 # close gripper when in range
                 print('X=',lego_center_x)
                 print('Y= ',lego_center_y)
                 if lego_center_x >300.0 and lego_center_x<342.0 and lego_center_y>195:
-                    ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=5)      
+                    # ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=5)      
                     break
                     
             end = time.time()
