@@ -8,10 +8,12 @@ if __name__ == '__main__':
     ep_robot = robot.Robot()
     ep_robot.initialize(conn_type="ap")
     ep_chassis = ep_robot.chassis
+    ep_arm = ep_robot.robotic_arm
+    ep_arm.moveto(x=120, y=45).wait_for_completed()
     ep_camera = ep_robot.camera
     ep_camera.start_video_stream(display=False, resolution=camera.STREAM_720P)
     
-    for i in range(220,300):
+    for i in range(301,330):
         if i%4==0:
             ep_chassis.drive_speed(x = .3, y = 0, z = 0, timeout=1)
         elif i%4==1:

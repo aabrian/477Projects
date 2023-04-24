@@ -27,9 +27,9 @@ def pickup():
 if __name__ == '__main__':
     model = YOLO("Project2-5\\runs\detect\\train12\weights\\best.pt")
 
-
+    ###################### PARAMETERS OF RETRIEVER BOT ##########################
     ep_robot1 = robot.Robot()
-    ep_robot1.initialize(conn_type="sta",sn = "3JKCH88001011D")
+    ep_robot1.initialize(conn_type="sta",sn = "3JKCH8800100WV")
     ep_camera1 = ep_robot1.camera
     ep_camera1.start_video_stream(display=False, resolution=camera.STREAM_360P)
     ep_chassis1 = ep_robot1.chassis
@@ -42,7 +42,6 @@ if __name__ == '__main__':
     n1 = 0
     x_out,y_out,z_out = 0,0,0
 
-    ###################### PARAMETERS OF RETRIEVER BOT ##########################
     kernel = (15,15)
 
     low = (100, 75, 61)
@@ -53,11 +52,11 @@ if __name__ == '__main__':
     ep_gripper1.pause()
     x_goal = 70
 
+
+    ######################## PARAMETERS OF DELIVERY BOT ############################
     ep_robot2 = robot.Robot()
-    # ep_robot2.initialize(conn_type="ap")
     
-    ep_robot2.initialize(conn_type="sta", sn="3JKCH8800100TY")
-    # 3JKCH8800100WV
+    ep_robot2.initialize(conn_type="sta", sn="3JKCH8800100TY") 
     ep_camera2 = ep_robot2.camera
     ep_camera2.start_video_stream(display=False, resolution=camera.STREAM_360P)
     ep_chassis2 = ep_robot2.chassis
@@ -70,8 +69,6 @@ if __name__ == '__main__':
     n2 = 0
     x_out,y_out,z_out = 0,0,0
 
-
-    ######################## PARAMETERS OF DELIVERY BOT ############################
     kernel = (15,15)
     ep_arm2.moveto(x=180, y=40).wait_for_completed() # STARTING POSITION OF GRIPPER
     ep_gripper2.open(power=50)
@@ -95,7 +92,7 @@ if __name__ == '__main__':
         if cameraFLag == 0:
             frame = ep_camera1.read_cv2_image(strategy="newest", timeout=2.5)
             frame_center = (int(frame.shape[1]/2),int(frame.shape[0]/2))
-        if counter1 == 0:
+        if counter1 == 0: # use machine learning to find lego and grip it
             FLAG =True
             while FLAG:
                 frame = ep_camera1.read_cv2_image(strategy="newest", timeout=2.5)
@@ -108,17 +105,12 @@ if __name__ == '__main__':
                     if n1 == 0:
                         ep_chassis1.drive_speed(x = 0, y = 0, z = 5, timeout=10)
                     for box in results[0].boxes:
-                        # print(results[0].names[int(box.cls.cpu().numpy())],box.cls,box.xyxy)
                         print(results[0].names[int(box.cls.cpu().numpy())])
-                        # list.append(results[0].names[int(box.cls.cpu().numpy())])
                         if 'lego' in results[0].names[int(box.cls.cpu().numpy())]:
-                            # print('sees lego')
-                            #box = boxes[0].xyxy  # returns one box
                             box = box.xyxy
                             lego_center_x = ((box[0,0]+box[0,2])/2).item()
                             lego_center_y = ((box[0,1]+box[0,3])/2).item()
                             print(lego_center_y)
-                            # print(frame_center[0])
                             if n1 == 0:
                                 ep_chassis1.drive_speed(x = 0, y = 0, z = 4, timeout=10)
                                 if abs(int(lego_center_x) - frame_center[0]) < 25:
@@ -183,11 +175,9 @@ if __name__ == '__main__':
         error_fb = x_goal - h_big
         Kx = .005
 
-        if counter1 == 1:
-            print("looking for river")
+        if counter1 == 1: 
             if linesP is not None:
-                print(theta)
-                if abs(theta) > 0: # Get correct heading of robot
+                if abs(theta) > 0: 
                     print(z_out)
                     z_out = Kt*theta
                     ep_chassis1.drive_speed(x = 0, y = 0, z = z_out, timeout=1)
