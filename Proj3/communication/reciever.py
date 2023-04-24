@@ -18,7 +18,7 @@ ep_arm = ep_robot.robotic_arm
 
 
 context = zmq.Context()
-socket = context.socket(zmq.REP)
+socket = context.socket(zmq.PAIR)
 print('binding')
 socket.bind("tcp://*:5555")
 print('done binding')
@@ -26,14 +26,14 @@ print('done binding')
 while True:
 # listening for other robot when it starts rotating then start navigating to other robot
     print('waiting')
-    message = socket.recv()
+    message = socket.recv().decode()
     
-    print("Recieved request: %s" % message)
-    # if message == "start":
-    #     print("the message says: ", message)
-    #     time.sleep(1)
+    
+    if message == "start":
+        print("the message says: ", message)
+        time.sleep(1)
         
-    #     socket.send("started")
+        socket.send(b"started")
         
     
 
