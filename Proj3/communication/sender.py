@@ -26,14 +26,17 @@ print("Connecting to ROBOT2…")
 
 
 
+
+
 while True:
     # send message to robot when beginning heading towards the river letting robot 2 know to start moving 
     print("sending message to robot 2")
     socket.send(b"start")
+    time.sleep(10)
 
-    message = socket.recv().decode()
-    print("message from robot 2: ", message)
+    # message = socket.recv().decode()
+    # print("message from robot 2: ", message)
 
-    if message == "started":
-        ep_gripper.close(100)
-        time.sleep(1)
+    # if message == "started":
+    #     ep_gripper.close(100)
+    #     time.sleep(1)
