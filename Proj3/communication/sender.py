@@ -19,7 +19,7 @@ ep_arm = ep_robot.robotic_arm
 
 #  Socket to talk to server
 context = zmq.Context()
-socket = context.socket(zmq.REQ)
+socket = context.socket(zmq.PAIR)
 #  you want to use the IP adress of thr computer connected to the robot you want to talk too
 socket.connect("tcp://192.168.50.161:5555")
 print("Connecting to ROBOT2…")
@@ -34,8 +34,8 @@ while True:
     socket.send(b"start")
     time.sleep(10)
 
-    # message = socket.recv().decode()
-    # print("message from robot 2: ", message)
+    message = socket.recv().decode()
+    print("message from robot 2: ", message)
 
     # if message == "started":
     #     ep_gripper.close(100)
