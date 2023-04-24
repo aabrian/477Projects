@@ -9,7 +9,9 @@ from robomaster import robot
 from robomaster import config
 
 
+
 ep_robot = robot.Robot()
+ep_robot.initialize(conn_type="sta", sn="3JKCH8800100WV")
 ep_chassis = ep_robot.chassis
 ep_arm = ep_robot.robotic_arm
 ep_gripper = ep_robot.gripper
