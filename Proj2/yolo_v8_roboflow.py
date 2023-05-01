@@ -10,7 +10,7 @@ ROBOFLOW_MODEL = "project2-l7rdy/4" # eg xx-xxxx--#
 ROBOFLOW_SIZE = 360
 
 rf = Roboflow(api_key="kKusTXhj0ObVGmi9slHp")
-project = rf.workspace().project("project2-l7rdy")
+project = rf.workspace().project("project3-ba692")
 model = project.version(4).model
 
 def call_roboflow_api(img):
