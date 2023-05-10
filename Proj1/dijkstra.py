@@ -88,18 +88,16 @@ if __name__ == '__main__':
     # note:* some additional math is needed because the indexing of a matrix and a graph is not exactly the same
     for i in range(numrows):
         for j in range(numcols):
-            if maze[numcols-(i+1)][j] == 2: # starting point
+            if maze[numcols-(i+1)][j] == 4: # starting point
                 # plot red x at point
                 plt.plot(j, i, marker="x", markersize=10, markerfacecolor="red", markeredgecolor="red")
                 start_x = j
                 start_y = i
-
-            if maze[numrows-(i+1)][j] == 3: # goal
+            if maze[numrows-(i+1)][j] == 2: # goal
                 # plot green circle at point
                 plt.plot(j, i, marker="o", markersize=10, markerfacecolor="green", markeredgecolor="green")  
                 goal_x = j
                 goal_y = i            
-
             if maze[numrows-(i+1)][j] == 1: # wall
                 # plot black at point
                 plt.plot(j, i, marker="o", markersize=5, markerfacecolor="black", markeredgecolor="black")
