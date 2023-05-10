@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 3
+names: ['2x2lego', '2x4lego', '4x4lego']
+
+roboflow:
+  workspace: cmsc-477-spring-2023
+  project: project3group3
+  version: 2
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/cmsc-477-spring-2023/project3group3/dataset/2
