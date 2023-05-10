@@ -20,6 +20,12 @@ visited = []
 
 l_graph = 16 #side length of each box in csv in cm
 edge_points = []
+
+step = 2
+process = 1
+interval = 2
+accepted_error = 0.5
+
 def find_centers(angle,height,width,dist,x_start,y_start):
     ratio = height/width
     rad = dist
@@ -172,10 +178,34 @@ def dijkstra():
     coord = (x_start,y_start)
     move(coord)
     k = costs[numrows-(y_start+1)][x_start]
+    s = 0
+    path = [(x_start,y_start,s)]
     for i in range(k-1):
         new_c = check_surr_cost(k-i,coord)
+        s = s + step
+        path.append((new_c[0],new_c[1],s))
         move(new_c)
         coord = new_c
+
+    return path
+
+def interp(t,path):
+# Take in a desired time, output an interpolated coordinated at that time
+    # 1. Find the two coordinates above and below the desired time from path
+    # 2. Using interpolation, find the new x and y coordinate
+    for i in range(len(path)):
+        if t - path[i][2] < step and t - path[i][2] > 0:
+            x_below = path[i][0]
+            y_below = path[i][1]
+            t_below = path[i][2]
+        if path[i][2] - t < step and path[i][2] - t > 0:
+            x_above = path[i][0]
+            y_above = path[i][1]
+            t_above = path[i][2]
+
+    x_interp = x_below + (t - t_below)*(x_above - x_below)/(t_above - t_below)
+    y_interp = y_below + (t - t_below)*(y_above - y_below)/(t_above - t_below)
+    return x_interp,y_interp
 
 if __name__ == '__main__':
     file = csv.reader(open(rb'C:\Users\jsche\OneDrive - University of Maryland\Spring 2023\CMSC477\Shared\477\Proj3\map_left.csv'), delimiter=',')
@@ -187,21 +217,28 @@ if __name__ == '__main__':
     plt.ylim(-5, numrows + 5)
     plt.xlim(-5, numcols + 5)
     
+    if process == 1: # Approaching River From Starting Position
+        start = 3
+        goal = 2
+    elif process == 2: # Returning to Start Position
+        start = 2
+        goal = 3
+
     for i in range(numrows):
         for j in range(numcols):
-            if maze[numrows-(i+1)][j] == 3: # starting point
+            if maze[numrows-(i+1)][j] == start: # starting point
                 # plot red x at point
-                plt.plot(j, i, marker="x", markersize=10, markerfacecolor="red", markeredgecolor="red")
+                # plt.plot(j, i, marker="x", markersize=10, markerfacecolor="red", markeredgecolor="red")
                 x_start = j
                 y_start = i
-            if maze[numrows-(i+1)][j] == 2: # goal
+            if maze[numrows-(i+1)][j] == goal: # goal
                 # plot green circle at point
-                plt.plot(j, i, marker="o", markersize=10, markerfacecolor="green", markeredgecolor="green")  
+                # plt.plot(j, i, marker="o", markersize=10, markerfacecolor="green", markeredgecolor="green")  
                 x_goal = j
                 y_goal = i            
-            if maze[numrows-(i+1)][j] == 1: # wall
+            # if maze[numrows-(i+1)][j] == 1: # wall
                 # plot black at point
-                plt.plot(j, i, marker="o", markersize=5, markerfacecolor="black", markeredgecolor="black")
+                # plt.plot(j, i, marker="o", markersize=5, markerfacecolor="black", markeredgecolor="black")
     
     #### ROBOT SETUP CODE ####
     # frame = ep_camera.read_cv2_image(strategy="newest", timeout=2.5)
@@ -219,14 +256,42 @@ if __name__ == '__main__':
     
     # Dijkstra Algorithm
     costs = np.zeros([numrows,numcols], dtype = int)
-    dijkstra()
+    des_path = dijkstra()
     
-    plt.show()
+    # plt.show()
 
     #### CONTROLLER CODE TO MOVE ####
     # Shortest Path Now calculated (both ways), so now can add movement
+    pos = (x_start,y_start)
+    
+    while abs(pos[0] - x_goal) > accepted_error and abs(pos[1] - y_goal)  > accepted_error:
+        ########### Wheel Odometry ############
+        # Get current position
+        pos[0] = 1
+        pos[1] = 2
+        curr_x = pos[0]
+        curr_y = pos[1]
 
-    # outside library ??
+        ###########Desired Position############
+        # Use interpolation to get desired position
+        des_x = interp(n)[0]
+        des_y = interp(n)[1]
+
+        ###########   CONTROLLER   ############
+        Kp = 0.5
+        error_x = curr_x - des_y
+        error_y = curr_x - des_y
+
+        v_w = np.array([error_x,error_y,0])
+        Rcw = np.array([[1,0,0],[0,-1,0],[0,0,1]])
+
+        v_b = np.matmul(Rcw,v_w)
+
+        # ep_chassis.drive_speed(x = Kp*v_b[0], y = Kp*_b[1], z = 0, timeout=1
+        if error_x < accepted_error and error_y < accepted_error:
+            # make a step to next desired position
+            n = n + step/interval
+
 
     #### FLIPPING DIRECTION ####
     # Flip goal and start, rerun movement loop
