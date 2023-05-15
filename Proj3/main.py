@@ -208,7 +208,7 @@ def interp(t,path):
     return x_interp,y_interp
 
 if __name__ == '__main__':
-    file = csv.reader(open(rb'C:\Users\jsche\OneDrive - University of Maryland\Spring 2023\CMSC477\Shared\477\Proj3\map_left.csv'), delimiter=',')
+    file = csv.reader(open(rb'Proj3\map_left.csv'), delimiter=',')
     x = list(file)
     maze = np.array(x).astype("int")
     numrows = len(maze)
@@ -228,17 +228,17 @@ if __name__ == '__main__':
         for j in range(numcols):
             if maze[numrows-(i+1)][j] == start: # starting point
                 # plot red x at point
-                # plt.plot(j, i, marker="x", markersize=10, markerfacecolor="red", markeredgecolor="red")
+                plt.plot(j, i, marker="x", markersize=10, markerfacecolor="red", markeredgecolor="red")
                 x_start = j
                 y_start = i
             if maze[numrows-(i+1)][j] == goal: # goal
                 # plot green circle at point
-                # plt.plot(j, i, marker="o", markersize=10, markerfacecolor="green", markeredgecolor="green")  
+                plt.plot(j, i, marker="o", markersize=10, markerfacecolor="green", markeredgecolor="green")  
                 x_goal = j
                 y_goal = i            
             # if maze[numrows-(i+1)][j] == 1: # wall
                 # plot black at point
-                # plt.plot(j, i, marker="o", markersize=5, markerfacecolor="black", markeredgecolor="black")
+                plt.plot(j, i, marker="o", markersize=5, markerfacecolor="black", markeredgecolor="black")
     
     #### ROBOT SETUP CODE ####
     # frame = ep_camera.read_cv2_image(strategy="newest", timeout=2.5)
@@ -258,7 +258,7 @@ if __name__ == '__main__':
     costs = np.zeros([numrows,numcols], dtype = int)
     des_path = dijkstra()
     
-    # plt.show()
+    plt.show()
 
     #### CONTROLLER CODE TO MOVE ####
     # Shortest Path Now calculated (both ways), so now can add movement
