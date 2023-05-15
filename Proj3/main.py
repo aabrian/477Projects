@@ -7,15 +7,13 @@ from robomaster import camera
 import math
 from matplotlib import pyplot as plt
 
-# ep_robot = robot.Robot()
-# ep_robot.initialize(conn_type="ap")
-# ep_camera = ep_robot.camera
-# ep_camera.start_video_stream(display=False, resolution=camera.STREAM_360P)
-# ep_chassis1 = ep_robot.chassis
-# ep_arm = ep_robot.robotic_arm
-# ep_gripper = ep_robot.gripper
+
+
+counter = 0
 
 center = []
+angles = []
+distance = []
 visited = []
 
 l_graph = 16 #side length of each box in csv in cm
@@ -149,7 +147,26 @@ def move(c): # moves using inputed coordinate and direction
     plt.plot(x, y, marker="+", markersize=15, markerfacecolor="purple", markeredgecolor="purple")
     plt.pause(0.05)
 
-def dijkstra():
+def find_crit_points(start,goal):
+    for i in range(numrows):
+        for j in range(numcols):
+            if maze[numrows-(i+1)][j] == start: # starting point
+                # plot red x at point
+                # plt.plot(j, i, marker="x", markersize=10, markerfacecolor="red", markeredgecolor="red")
+                x_start = j
+                y_start = i
+            if maze[numrows-(i+1)][j] == goal: # goal
+                # plot green circle at point
+                # plt.plot(j, i, marker="o", markersize=10, markerfacecolor="green", markeredgecolor="green")  
+                x_goal = j
+                y_goal = i            
+            # if maze[numrows-(i+1)][j] == 1: # wall
+                # plot black at point
+                # plt.plot(j, i, marker="o", markersize=5, markerfacecolor="black", markeredgecolor="black")
+    return x_start,y_start,x_goal,y_goal
+
+def dijkstra(x_start,y_start,x_goal,y_goal,maze):
+
     costs[numrows-(y_goal+1)][x_goal] = 1 # add a one to ending point in costs
     visited.append((x_goal,y_goal))
     n = 1
@@ -207,6 +224,19 @@ def interp(t,path):
     y_interp = y_below + (t - t_below)*(y_above - y_below)/(t_above - t_below)
     return x_interp,y_interp
 
+
+def pickup():
+    ep_gripper.open(power=50)
+    time.sleep(1)
+    ep_gripper.pause()
+    
+
+    ep_gripper.close(power=100)
+    time.sleep(1)
+    ep_gripper.pause()
+    
+    ep_arm.moveto(x=170, y=-0).wait_for_completed()
+
 if __name__ == '__main__':
     file = csv.reader(open(rb'C:\Users\jsche\OneDrive - University of Maryland\Spring 2023\CMSC477\Shared\477\Proj3\map_left.csv'), delimiter=',')
     x = list(file)
@@ -217,89 +247,134 @@ if __name__ == '__main__':
     plt.ylim(-5, numrows + 5)
     plt.xlim(-5, numcols + 5)
     
-    if process == 1: # Approaching River From Starting Position
-        start = 3
-        goal = 2
-    elif process == 2: # Returning to Start Position
-        start = 2
-        goal = 3
-
-    for i in range(numrows):
-        for j in range(numcols):
-            if maze[numrows-(i+1)][j] == start: # starting point
-                # plot red x at point
-                # plt.plot(j, i, marker="x", markersize=10, markerfacecolor="red", markeredgecolor="red")
-                x_start = j
-                y_start = i
-            if maze[numrows-(i+1)][j] == goal: # goal
-                # plot green circle at point
-                # plt.plot(j, i, marker="o", markersize=10, markerfacecolor="green", markeredgecolor="green")  
-                x_goal = j
-                y_goal = i            
-            # if maze[numrows-(i+1)][j] == 1: # wall
-                # plot black at point
-                # plt.plot(j, i, marker="o", markersize=5, markerfacecolor="black", markeredgecolor="black")
     
     #### ROBOT SETUP CODE ####
-    # frame = ep_camera.read_cv2_image(strategy="newest", timeout=2.5)
-    # frame_center = (int(frame.shape[1]/2),int(frame.shape[0]/2))
+    ep_robot = robot.Robot()
+    ep_robot.initialize(conn_type="ap")
+    ep_camera = ep_robot.camera
+    ep_camera.start_video_stream(display=False, resolution=camera.STREAM_360P)
+    ep_chassis = ep_robot.chassis
+    ep_arm = ep_robot.robotic_arm
+    ep_gripper = ep_robot.gripper
+    frame = ep_camera.read_cv2_image(strategy="newest", timeout=2.5)
+    frame_center = (int(frame.shape[1]/2),int(frame.shape[0]/2))
 
     #### LOOP STARTS HERE ####
     # Find Boxes and Add Walls
-    # Rotate 360 degrees, wheel odometry to get angle
-    find_centers(np.pi/6,1,1,150,x_start,y_start)
-    find_centers(np.pi/2,1,1,120,x_start,y_start)
-    find_centers(np.pi*2/3,1,1,100,x_start,y_start)
-    find_centers(np.pi/3,1,1,75,x_start,y_start)
-    find_centers(np.pi/4,1,1,85,x_start,y_start)
-    add_walls(center,maze)
-    
-    # Dijkstra Algorithm
-    costs = np.zeros([numrows,numcols], dtype = int)
-    des_path = dijkstra()
+    if counter == 0:
+        # Rotate 360 degrees, wheel odometry to get angle
+        # Add angle and distance into arrays
+        counter += 1
+    if counter == 1:
+        start = 3
+        goal = 2
+        crit_points = find_crit_points(start,goal)
+        for i in range(len(angles)):
+            find_centers(angles[i],1,1,distance[i],find_crit_points[0](start,goal),find_crit_points[1](start,goal)) 
+        add_walls(center,maze)
+
+        # Dijkstra Algorithm
+        costs = np.zeros([numrows,numcols], dtype = int)
+        des_path = dijkstra(find_crit_points(start,goal))
+        counter += 1
     
     # plt.show()
+    if counter == 2:
+        # approach lego starting position
+        counter += 1
+    if counter == 3:
+        # find first lego, go to it
+        counter += 1
+    if counter == 4:
+        # pick up lego
+        counter += 1
+    if counter == 5:
+        # return to lego starting position
+        counter += 1
+    if counter == 6:
+        # return to starting position
+        counter += 1
+    if counter == 7:
+        # wait for communication from other robot that it's in position
+        counter += 1
+    if counter == 8:
+        pos = (crit_points[0],crit_points[1])
+        
+        while abs(pos[0] - crit_points[3]) > accepted_error and abs(pos[1] - crit_points[4]) > accepted_error:
+            ########### Wheel Odometry ############
+            # Get current position
+            
+            curr_x = pos[0]
+            curr_y = pos[1]
 
-    #### CONTROLLER CODE TO MOVE ####
-    # Shortest Path Now calculated (both ways), so now can add movement
-    pos = (x_start,y_start)
-    
-    while abs(pos[0] - x_goal) > accepted_error and abs(pos[1] - y_goal)  > accepted_error:
-        ########### Wheel Odometry ############
-        # Get current position
-        pos[0] = 1
-        pos[1] = 2
-        curr_x = pos[0]
-        curr_y = pos[1]
+            des_x = interp(n,des_path)[0]
+            des_y = interp(n,des_path)[1]
 
-        ###########Desired Position############
-        # Use interpolation to get desired position
-        des_x = interp(n)[0]
-        des_y = interp(n)[1]
+            error_x = curr_x - des_x
+            error_y = curr_y - des_y
 
-        ###########   CONTROLLER   ############
-        Kp = 0.5
-        error_x = curr_x - des_y
-        error_y = curr_x - des_y
+            v_w = np.array([error_x,error_y,0])
+            Rcw = np.array([[1,0,0],[0,-1,0],[0,0,1]])
 
-        v_w = np.array([error_x,error_y,0])
-        Rcw = np.array([[1,0,0],[0,-1,0],[0,0,1]])
+            v_b = np.matmul(Rcw,v_w)
 
-        v_b = np.matmul(Rcw,v_w)
+            Kp = 0.5
+            ep_chassis.drive_speed(x = Kp*v_b[0], y = Kp*v_b[1], z = 0, timeout=1)
+            if abs(error_x) < accepted_error and abs(error_y) < accepted_error:
+                # make a step to next desired position
+                n = n + step/interval
+        counter += 1
+    if counter == 9:
+        # Goal is reached, communicate with other robot to come to river
+        counter += 1
+    if counter == 10:
+        # center on river
+        counter += 1
+    if counter == 11:
+        # approach river
+        counter += 1
+    if counter == 12:
+        # wait for communication, release grip
+        counter += 1
+    if counter == 13:
+        # return to position
+        counter += 1
+    if counter == 14:
+        start = 2
+        goal = 3
+        crit_points = find_crit_points(start,goal)
 
-        # ep_chassis.drive_speed(x = Kp*v_b[0], y = Kp*_b[1], z = 0, timeout=1
-        if error_x < accepted_error and error_y < accepted_error:
-            # make a step to next desired position
-            n = n + step/interval
+        # Dijkstra Algorithm
+        costs = np.zeros([numrows,numcols], dtype = int)
+        des_path = dijkstra(find_crit_points(start,goal))
 
+        pos = (crit_points[0],crit_points[1])
+        
+        while abs(pos[0] - crit_points[3]) > accepted_error and abs(pos[1] - crit_points[4]) > accepted_error:
+            ########### Wheel Odometry ############
+            # Get current position
+            
+            curr_x = pos[0]
+            curr_y = pos[1]
 
-    #### FLIPPING DIRECTION ####
-    # Flip goal and start, rerun movement loop
-    # frame = ep_camera.read_cv2_image(strategy="newest", timeout=2.5)
-    # frame_center = (int(frame.shape[1]/2),int(frame.shape[0]/2))
-    
-    # angle = 0
-    # frame = cv2.putText(frame, str(angle), (50,50), cv2.FONT_HERSHEY_SIMPLEX, 
-    #                1, (0,255,255), 2, cv2.LINE_AA)
+            des_x = interp(n,des_path)[0]
+            des_y = interp(n,des_path)[1]
+
+            error_x = curr_x - des_x
+            error_y = curr_y - des_y
+
+            v_w = np.array([error_x,error_y,0])
+            Rcw = np.array([[1,0,0],[0,-1,0],[0,0,1]])
+
+            v_b = np.matmul(Rcw,v_w)
+
+            Kp = 0.5
+            ep_chassis.drive_speed(x = Kp*v_b[0], y = Kp*v_b[1], z = 0, timeout=1)
+            if abs(error_x) < accepted_error and abs(error_y) < accepted_error:
+                # make a step to next desired position
+                n = n + step/interval
+        
+        counter = 1
+
     # cv2.imshow(frame,"frame")
     # cv2.waitKey(10)
