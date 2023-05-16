@@ -238,7 +238,7 @@ def pickup():
     ep_arm.moveto(x=170, y=-0).wait_for_completed()
 
 if __name__ == '__main__':
-    file = csv.reader(open(rb'C:\Users\jsche\OneDrive - University of Maryland\Spring 2023\CMSC477\Shared\477\Proj3\map_left.csv'), delimiter=',')
+    file = csv.reader(open(rb'Proj3\map_left.csv'), delimiter=',')
     x = list(file)
     maze = np.array(x).astype("int")
     numrows = len(maze)
@@ -277,7 +277,7 @@ if __name__ == '__main__':
         costs = np.zeros([numrows,numcols], dtype = int)
         des_path = dijkstra(find_crit_points(start,goal))
         counter += 1
-    
+
     # plt.show()
     if counter == 2:
         # approach lego starting position
