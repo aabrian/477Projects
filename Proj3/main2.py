@@ -9,8 +9,13 @@ from robomaster import camera
 import math
 from scipy import interpolate
 from matplotlib import pyplot as plt
+import zmq
 
-
+context = zmq.Context()
+socket = context.socket(zmq.PAIR)
+print('binding')
+socket.bind("tcp://*:5555")
+print('done binding')
 
 counter = 0
 
@@ -263,7 +268,7 @@ if __name__ == '__main__':
     x_new = np.zeros((3,))
 
     ep_robot = robot.Robot()
-    ep_robot.initialize(conn_type="ap")
+    ep_robot.initialize(conn_type="sta", sn="3JKCH8800100TY")
     ep_camera = ep_robot.camera
     ep_camera.start_video_stream(display=False, resolution=camera.STREAM_360P)
     ep_chassis = ep_robot.chassis
@@ -359,7 +364,11 @@ if __name__ == '__main__':
             time.sleep(1)
             ep_gripper.pause()
             # wait for communication to go
-            counter += 1
+            print('waiting on robot 1')
+            message = socket.recv().decode()
+            if message == "Start":
+                time.sleep(4)
+                counter += 1
         if counter == 2:
             start = 3
             goal = 2
@@ -544,5 +553,8 @@ if __name__ == '__main__':
         
         if counter == 6:
             # send communication that it's in position
+            # print("sending message to robot 2")
+            # socket.send(b"platform")
+            # time.sleep(10)
             counter = 6
         

@@ -9,6 +9,12 @@ import math
 from scipy import interpolate
 from matplotlib import pyplot as plt
 import cv2
+import zmq
+# communication initialization
+context = zmq.Context()
+socket = context.socket(zmq.PAIR)
+socket.connect("tcp://192.168.50.161:5555")
+print("Connecting to ROBOT2…")
 
 
 
@@ -475,6 +481,9 @@ if __name__ == '__main__':
             print("reached goal")
             counter += 2
         if counter == 6:
+            print("sending message to robot 2")
+            socket.send(b"start")
+            time.sleep(10)
             # Goal is reached, communicate with other robot to come to river
             ep_chassis.drive_speed(x = .1, y = 0, z = 0, timeout=10)
 
