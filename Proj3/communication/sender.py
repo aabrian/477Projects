@@ -1,6 +1,9 @@
 #robot 1 
 # bryans IP 192.168.50.90
 #jareds IP 192.168.50.165
+#david IP 192.168.50.161
+#david IP on jared wifi 192.168.1.171
+#
 
 import time
 import zmq

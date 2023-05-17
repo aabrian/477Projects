@@ -24,11 +24,11 @@ def pickup():
     ep_arm.moveto(x=170, y=-0).wait_for_completed()
 
 if __name__ == '__main__':
-    model = YOLO("Project2-5\\runs\detect\\train12\weights\\best.pt")
+    model = YOLO("/Users/david/RoboMaster-SDK/Project1/shared/Project2-5/runs/detect/train12/weights/best.pt")
 
 
     ep_robot = robot.Robot()
-    ep_robot.initialize(conn_type="ap")
+    ep_robot.initialize(conn_type="sta", sn="3JKCH8800100TY")
     ep_camera = ep_robot.camera
     ep_camera.start_video_stream(display=False, resolution=camera.STREAM_360P)
     ep_chassis = ep_robot.chassis
