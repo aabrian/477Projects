@@ -10,7 +10,8 @@ import math
 import cv2
 
 ep_robot = robot.Robot()
-ep_robot.initialize(conn_type="ap")
+# ep_robot.initialize(conn_type="sta", sn="3JKCH8800100TY")
+
 ep_sensor = ep_robot.sensor
 ep_chassis = ep_robot.chassis
 
@@ -33,9 +34,11 @@ if __name__ == '__main__':
     x_old = np.zeros((3,))
     x_new = np.zeros((3,))
     frame_undistorted_gray_old = None
-
     ep_robot = robot.Robot()
-    ep_robot.initialize(conn_type="ap")
+    ep_robot.initialize(conn_type="sta", sn="3JKCH8800100TY")
+
+    
+    # ep_robot.initialize(conn_type="ap")
     ep_robot.chassis.sub_position(cs = 0,freq=50, callback=lambda p: sub_position_handler(p, x_new))
     ep_camera = ep_robot.camera
     ep_camera.start_video_stream(display=False)
