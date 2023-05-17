@@ -8,12 +8,22 @@ import csv
 import pandas as pd
 import math
 import cv2
+import zmq
+# communication initialization
+context = zmq.Context()
+socket = context.socket(zmq.PAIR)
+socket.connect("tcp://192.168.1.171:5555")
+print("Connecting to ROBOT2…")
 
+
+<<<<<<< HEAD
 ep_robot = robot.Robot()
 # ep_robot.initialize(conn_type="sta", sn="3JKCH8800100TY")
 
 ep_sensor = ep_robot.sensor
 ep_chassis = ep_robot.chassis
+=======
+>>>>>>> ad173a36c2a434700cd04f269e1d6e5f8232ba1e
 
 def sub_position_handler(p, x_new):
     x_new[0] = p[0]
@@ -30,15 +40,23 @@ def move_square(ep_chassis, x_len=.5, y_len=.5, speed=1.0):
         ep_chassis.move(x=0,      y=-y_len, z=0, xy_speed=speed).wait_for_completed()
 
 if __name__ == '__main__':
+    ep_robot = robot.Robot()
+    ep_robot.initialize(conn_type="sta", sn="3JKCH8800100WV")
+    ep_sensor = ep_robot.sensor
+    ep_chassis = ep_robot.chassis
     # Wheel odometry position estimates for rescaling visual odometry t vector
     x_old = np.zeros((3,))
     x_new = np.zeros((3,))
     frame_undistorted_gray_old = None
+<<<<<<< HEAD
     ep_robot = robot.Robot()
     ep_robot.initialize(conn_type="sta", sn="3JKCH8800100TY")
 
     
     # ep_robot.initialize(conn_type="ap")
+=======
+
+>>>>>>> ad173a36c2a434700cd04f269e1d6e5f8232ba1e
     ep_robot.chassis.sub_position(cs = 0,freq=50, callback=lambda p: sub_position_handler(p, x_new))
     ep_camera = ep_robot.camera
     ep_camera.start_video_stream(display=False)
