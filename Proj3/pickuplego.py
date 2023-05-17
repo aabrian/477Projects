@@ -19,7 +19,7 @@ def pickup():
     ep_arm.moveto(x=170, y=-0).wait_for_completed()
 
 if __name__ == '__main__':
-    model = YOLO("Project2-5/runs/detect/train12/weights/best.pt")
+    model = YOLO("/Users/david/RoboMaster-SDK/Project1/shared/Proj3/best.pt")
 
     
 
