@@ -464,83 +464,20 @@ if __name__ == '__main__':
             ep_chassis.drive_speed(x=-.05, y = 0, z = 0, timeout=5)
             time.sleep(2.5)
             ep_chassis.drive_speed( x=0 , y=0 , z=-20, timeout=5)
-            time.sleep(4.75)
+            time.sleep(4.5)
             counter += 1
         
         if counter == 5:
-            start = 2
-            goal = 3
-            crit_points = find_crit_points(start,goal)
-            # Dijkstra Algorithm
-            costs = np.zeros([numrows,numcols], dtype = int)
-            des_path = dijkstra(crit_points[0],crit_points[1],crit_points[2],crit_points[3],maze)
-            # position controller to goal
-            curr_x = crit_points[0]
-            curr_y = crit_points[1]
-            n = 0
-            count = 0
-            des_x_old = crit_points[0]
-            des_y_old = crit_points[1]
-            check_x = 0
-            check_y = 0
-            print(x_new)
-            while abs(curr_x - crit_points[2]) > accepted_error or abs(curr_y - crit_points[3]) > accepted_error:
-                ########### Wheel Odometry ############
-                # Get current position
-                
-                curr_x = (crit_points[0]*l_graph + x_new[0]*100)/l_graph
-                curr_y = (crit_points[1]*l_graph - x_new[1]*100)/l_graph
-                boo = False
-                for i in range(len(des_path)):
-                    if des_path[i][2] == n:
-                        des_x_new = des_path[i][0]
-                        des_y_new = des_path[i][1]
-                        boo = True
-                if n == 0:
-                    des_x_new = des_path[0][0]
-                    des_y_new = des_path[0][1]
-                    boo = True
-                if n == step*(len(des_path)-1):
-                    des_x_new = des_path[len(des_path)-1][0]
-                    des_y_new = des_path[len(des_path)-1][1]
-                    boo = True
-                if not boo:    
-                    des_x_new = interp(n,des_path)[0]
-                    des_y_new = interp(n,des_path)[1]
-                boo = False
-                error_x = des_x_new - curr_x
-                error_y = des_y_new - curr_y
-                v_w = np.array([error_x,error_y,0])
-                Rcw = np.array([[1,0,0],[0,-1,0],[0,0,1]])
-
-                v_b = np.matmul(Rcw,v_w)
-
-
-                print(curr_x,curr_y)
-                print(des_x_new,des_y_new)
-                print(error_x,error_y)
-                if abs(v_b[0]) < 0.25:
-                    Kpx = 0.5
-                else: Kpx = 0.25
-                if abs(v_b[0]) < 0.25:
-                    Kpy = 0.5
-                else: Kpy = 0.25
-                ep_chassis.drive_speed(x = Kpx*v_b[0], y = Kpy*v_b[1], z = 0, timeout=1)
-                time.sleep(0.05)
-                if abs(error_x) < accepted_error and abs(error_y) < accepted_error:
-                    if n < step*(len(des_path)-1):
-                    # make a step to next desired position
-                        n = n + step/interval
-
-
-            ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=10)
-            print("reached goal")
-            # open gripper
+            ep_chassis.drive_speed(x=0 , y=.25 , z=0, timeout=5)
+            time.sleep(5.25)
+            ep_chassis.drive_speed(x=.25 , y=0 , z=0, timeout=5)
+            time.sleep(5)
+            ep_chassis.drive_speed(x=0 , y=.0 , z=0, timeout=10)
             ep_gripper.open(power=50)
             time.sleep(1)
             ep_gripper.pause()      
             # turn 180 degrees
-            counter += 1
+            counter += 6
         
         if counter == 6:
             # send communication that it's in position
