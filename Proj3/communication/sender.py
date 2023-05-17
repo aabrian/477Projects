@@ -24,7 +24,7 @@ ep_arm = ep_robot.robotic_arm
 context = zmq.Context()
 socket = context.socket(zmq.PAIR)
 #  you want to use the IP adress of thr computer connected to the robot you want to talk too
-socket.connect("tcp://192.168.50.161:5555")
+socket.connect("tcp://192.168.1.171:5555")
 print("Connecting to ROBOT2…")
 
 
