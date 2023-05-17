@@ -19,7 +19,7 @@ def pickup():
     ep_arm.moveto(x=170, y=-0).wait_for_completed()
 
 if __name__ == '__main__':
-    model = YOLO("/Users/david/RoboMaster-SDK/Project1/shared/Proj3/best.pt")
+    model = YOLO("/Users/david/RoboMaster-SDK/Project1/shared/Project2-5/runs/detect/train12/weights/last.pt")
 
     
 
@@ -67,7 +67,7 @@ if __name__ == '__main__':
                 frame = ep_camera.read_cv2_image(strategy="newest", timeout=2)
                 if n ==0:
                     print("looking for lego")
-                    # ep_chassis.drive_speed(x = 0, y = 0, z = 15, timeout=5)
+                    ep_chassis.drive_speed(x = 0, y = 0, z = 3, timeout=5)
                 if frame is not None:
                     start = time.time()
                     if model.predictor:
@@ -75,37 +75,39 @@ if __name__ == '__main__':
                     results = model.predict(source=frame, show=True,half=True)
                     boxes = results[0].boxes
                     # print(results[0].names[])
-                    list = []
+                    # list = []
                     for box in results[0].boxes:
                     #     # print(results[0].names[int(box.cls.cpu().numpy())],box.cls,box.xyxy)
                         print(results[0].names[int(box.cls.cpu().numpy())])
-                        list.append(results[0].names[int(box.cls.cpu().numpy())])
+                        # list.append(results[0].names[int(box.cls.cpu().numpy())])
                     
                         if 'lego' in results[0].names[int(box.cls.cpu().numpy())]:
                             # print('sees lego')
-                            #box = boxes[0].xyxy  # returns one box
+                            # box = boxes[0].xyxy  # returns one box
                             box = box.xyxy
                             lego_center_x = ((box[0,0]+box[0,2])/2).item()
                             lego_center_y = ((box[0,1]+box[0,3])/2).item()
-                        #     if n == 0:
-                        #         ep_chassis.drive_speed(x = 0, y = 0, z = -(int(lego_center_y) - frame_center[0])/40, timeout=2)
-                        #         n = 1
-                        #     if abs(int(lego_center_y) - frame_center[0]) < 30:
-                        #         ep_chassis.drive_speed(x = 0, y = 0, z = 0)
-                        #         print('stops')
-                        #         n=2
-                        #     if n==2:
-                        #         ep_chassis.drive_speed(x = 0.05, y = 0, z = 0, timeout=10)
-                        #     # ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=5)
-                        #     # time.sleep(1)
-                        #     ## close gripper when in range
-                        #     # print('X=',lego_center_x)
-                        #     # print('Y= ',lego_center_y)
-                        #     if lego_center_x >300.0 and lego_center_x<342.0 and lego_center_y>195:      
-                        #         # continue
-                        #         # break
-                        #         counter = 1
-                        #         FLAG=False
+                            print(f"lego_center_x: {lego_center_x}")
+                            print(f"lego_center_y{lego_center_y}")
+                            if n == 0:
+                                ep_chassis.drive_speed(x = 0, y = 0, z = -(int(lego_center_y) - frame_center[0])/40, timeout=2)
+                                n = 1
+                            if abs(int(lego_center_y) - frame_center[0]) < 30:
+                                ep_chassis.drive_speed(x = 0, y = 0, z = 0)
+                                print('stops')
+                                n=2
+                            if n==2:
+                                ep_chassis.drive_speed(x = 0.05, y = 0, z = 0, timeout=10)
+                            # ep_chassis.drive_speed(x = 0, y = 0, z = 0, timeout=5)
+                            # time.sleep(1)
+                            # close gripper when in range
+                            print('X=',lego_center_x)
+                            print('Y= ',lego_center_y)
+                            if lego_center_x >300.0 and lego_center_x<342.0 and lego_center_y>195:      
+                                # continue
+                                # break
+                                counter = 1
+                                FLAG=False
             # while True:
             #     frame = ep_camera.read_cv2_image(strategy="newest", timeout=2.5)
             #     frame_center = (int(frame.shape[1]/2),int(frame.shape[0]/2))
