@@ -40,6 +40,6 @@ while True:
     message = socket.recv().decode()
     print("message from robot 2: ", message)
 
-    # if message == "started":
-    #     ep_gripper.close(100)
-    #     time.sleep(1)
+    if message == "started":
+        ep_gripper.close(100)
+        time.sleep(1)
