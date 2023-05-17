@@ -13,7 +13,7 @@ import zmq
 # communication initialization
 context = zmq.Context()
 socket = context.socket(zmq.PAIR)
-socket.connect("tcp://192.168.50.161:5555")
+socket.connect("tcp://192.168.1.171:5555")
 print("Connecting to ROBOT2…")
 
 
@@ -269,7 +269,7 @@ if __name__ == '__main__':
     x_new = np.zeros((3,))
 
     ep_robot = robot.Robot()
-    ep_robot.initialize(conn_type="ap")
+    ep_robot.initialize(conn_type="sta", sn="3JKCH8800100WV")
     ep_camera = ep_robot.camera
     ep_camera.start_video_stream(display=False, resolution=camera.STREAM_360P)
     ep_chassis = ep_robot.chassis

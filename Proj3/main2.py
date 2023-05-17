@@ -254,7 +254,7 @@ def pickup():
     ep_arm.moveto(x=170, y=-0).wait_for_completed()
 
 if __name__ == '__main__':
-    file = csv.reader(open(rb'477\Proj3\map_left1.csv'), delimiter=',')
+    file = csv.reader(open(rb'/Users/david/RoboMaster-SDK/Project1/shared/Proj3/map_left1.csv'), delimiter=',')
     x = list(file)
     maze = np.array(x).astype("int")
     numrows = len(maze)
@@ -277,7 +277,7 @@ if __name__ == '__main__':
     ep_gripper = ep_robot.gripper
     ep_sensor = ep_robot.sensor
 
-    model = YOLO("477\\Project2-5\\runs\detect\\train12\weights\\best.pt")
+    model = YOLO("/Users/david/RoboMaster-SDK/Project1/shared/Project2-5/runs/detect/train12/weights/best.pt")
 
     # insert correct arm position
     
